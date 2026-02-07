@@ -53,7 +53,7 @@ Make sure the following are installed:
 * Java (JDK 21 or latest) → `java -version`
 * Maven → `mvn -version`
 * Git
-* VS Code or Eclipse
+* VS Code
 
 ---
 

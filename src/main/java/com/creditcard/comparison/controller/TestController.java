@@ -3,10 +3,11 @@ package com.creditcard.comparison.controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api")
 public class TestController {
 
-    @GetMapping("/")
-    public String test() {
-        return "Spring Boot + Java 21 working 🚀";
+    @GetMapping("/hello")
+    public String hello() {
+        return "Backend Connected Successfully 🚀";
     }
 }

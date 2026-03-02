@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Comparison System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect x="2" y="8" width="28" height="18" rx="3" fill="white" opacity="0.2"/>
+                        <rect x="2" y="11" width="28" height="4" fill="white" opacity="0.8"/>
+                        <circle cx="8" cy="21" r="2" fill="white"/>
+                    </svg>
+                    <span>CardCompare</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home" class="active">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#tools">Tools</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home/Hero Section -->
+<!-- Home/Hero Section -->
+<section id="home" class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Find Your Perfect Credit Card</h1>
+                <p class="hero-subtitle">
+                    Compare and analyze credit cards using advanced algorithms. 
+                    Make informed decisions with our intelligent recommendation system.
+                </p>
+                <div class="hero-cta">
+                    <a href="#features" class="btn btn-primary btn-large">Get Started</a>
+                    <a href="#tools" class="btn btn-outline btn-large">Explore Tools</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <!-- Card Stack with Fixed Positioning -->
+<div class="card-stack">
+    <!-- Card 1: Travel Rewards -->
+    <div class="floating-card card-1">
+        <div class="card-content">
+            <div class="card-top">
+                <div class="card-logo">VISA</div>
+                <div class="card-type">PLATINUM</div>
+            </div>
+            <div class="card-chip">
+                <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
+                    <rect width="40" height="30" rx="4" fill="#FFD700"/>
+                    <rect x="5" y="7" width="10" height="8" rx="1" fill="#FFA500"/>
+                    <rect x="25" y="7" width="10" height="8" rx="1" fill="#FFA500"/>
+                </svg>
+            </div>
+            <div class="card-number">4532 •••• •••• 8976</div>
+            <div class="card-bottom">
+                <div class="card-holder">
+                    <div class="card-label">CARD HOLDER</div>
+                    <div class="card-name">JOHN DOE</div>
+                </div>
+                <div class="card-expiry">
+                    <div class="card-label">EXPIRES</div>
+                    <div class="card-date">12/27</div>
+                </div>
+            </div>
+            <div class="card-rewards">5% Travel Rewards</div>
+        </div>
+    </div>
+    
+    <!-- Card 2: Cashback Card -->
+    <div class="floating-card card-2">
+        <div class="card-content">
+            <div class="card-top">
+                <div class="card-logo">MC</div>
+                <div class="card-type">GOLD</div>
+            </div>
+            <div class="card-chip">
+                <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
+                    <rect width="40" height="30" rx="4" fill="#FFD700"/>
+                    <rect x="5" y="7" width="10" height="8" rx="1" fill="#FFA500"/>
+                    <rect x="25" y="7" width="10" height="8" rx="1" fill="#FFA500"/>
+                </svg>
+            </div>
+            <div class="card-number">5412 •••• •••• 3456</div>
+            <div class="card-bottom">
+                <div class="card-holder">
+                    <div class="card-label">CARD HOLDER</div>
+                    <div class="card-name">SARAH SMITH</div>
+                </div>
+                <div class="card-expiry">
+                    <div class="card-label">EXPIRES</div>
+                    <div class="card-date">09/26</div>
+                </div>
+            </div>
+            <div class="card-rewards">3% Cash Back</div>
+        </div>
+    </div>
+    
+    <!-- Card 3: Student Card -->
+    <div class="floating-card card-3">
+        <div class="card-content">
+            <div class="card-top">
+                <div class="card-logo">VISA</div>
+                <div class="card-type">STUDENT</div>
+            </div>
+            <div class="card-chip">
+                <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
+                    <rect width="40" height="30" rx="4" fill="#FFD700"/>
+                    <rect x="5" y="7" width="10" height="8" rx="1" fill="#FFA500"/>
+                    <rect x="25" y="7" width="10" height="8" rx="1" fill="#FFA500"/>
+                </svg>
+            </div>
+            <div class="card-number">4916 •••• •••• 2341</div>
+            <div class="card-bottom">
+                <div class="card-holder">
+                    <div class="card-label">CARD HOLDER</div>
+                    <div class="card-name">MIKE JONES</div>
+                </div>
+                <div class="card-expiry">
+                    <div class="card-label">EXPIRES</div>
+                    <div class="card-date">06/28</div>
+                </div>
+            </div>
+            <div class="card-rewards">No Annual Fee</div>
+        </div>
+    </div>
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-wave">
+        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0L60 10C120 20 240 40 360 46.7C480 53 600 47 720 43.3C840 40 960 40 1080 46.7C1200 53 1320 67 1380 73.3L1440 80V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V0Z" fill="white"/>
+        </svg>
+    </div>
+</section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Powerful Features</h2>
+                <p>Everything you need to make the right credit card choice</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="2"/>
+                            <path d="M20 12V20L26 26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Smart Search</h3>
+                    <p>Quickly find credit cards by keywords like cashback, travel, or student benefits.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <path d="M20 8L24 16L33 17L26 24L28 33L20 28L12 33L14 24L7 17L16 16L20 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Personalized Recommendations</h3>
+                    <p>Get card suggestions tailored to your lifestyle - traveler, cashback seeker, or student.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <path d="M8 20H32M8 20L16 12M8 20L16 28" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Spell Check</h3>
+                    <p>Advanced word verification with intelligent suggestions for accurate searches.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <rect x="8" y="8" width="24" height="24" rx="2" stroke="currentColor" stroke-width="2"/>
+                            <path d="M8 16H32M16 8V32" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3>Frequency Analysis</h3>
+                    <p>Discover how often specific terms appear in our comprehensive card database.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section id="tools" class="tools-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Analysis Tools</h2>
+                <p>Use our intelligent tools to find and analyze credit cards</p>
+            </div>
+
+            <!-- Search Tool -->
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-icon">🔍</div>
+                    <div>
+                        <h3>Search Credit Cards</h3>
+                        <p>Find credit cards by keyword</p>
+                    </div>
+                </div>
+                <div class="tool-body">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Enter keyword (e.g., cashback, travel, student)"
+                            class="input-field"
+                        />
+                        <button id="searchBtn" class="btn btn-primary">Search</button>
+                    </div>
+                    <div id="searchLoading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Searching...</p>
+                    </div>
+                    <div id="searchResults" class="results"></div>
+                </div>
+            </div>
+
+            <!-- Recommendation Tool -->
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-icon">🎯</div>
+                    <div>
+                        <h3>Get Recommendations</h3>
+                        <p>Personalized credit card suggestions</p>
+                    </div>
+                </div>
+                <div class="tool-body">
+                    <div class="input-group">
+                        <select id="userTypeSelect" class="select-field">
+                            <option value="">-- Select Your Profile --</option>
+                            <option value="traveler">✈️ Frequent Traveler</option>
+                            <option value="cashback">💰 Cashback Seeker</option>
+                            <option value="student">🎓 Student</option>
+                        </select>
+                        <button id="recommendBtn" class="btn btn-primary">Get Recommendations</button>
+                    </div>
+                    <div id="recommendLoading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Finding best matches...</p>
+                    </div>
+                    <div id="recommendResults" class="results"></div>
+                </div>
+            </div>
+
+            <!-- Two Column Tools -->
+            <div class="tools-grid">
+                <!-- Spell Check Tool -->
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-icon">✓</div>
+                        <div>
+                            <h3>Spell Check</h3>
+                            <p>Verify word spelling</p>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <div class="input-group-vertical">
+                            <input 
+                                type="text" 
+                                id="spellCheckInput" 
+                                placeholder="Enter a word to check"
+                                class="input-field"
+                            />
+                            <button id="spellCheckBtn" class="btn btn-secondary">Check Spelling</button>
+                        </div>
+                        <div id="spellCheckLoading" class="loading hidden">
+                            <div class="spinner"></div>
+                        </div>
+                        <div id="spellCheckResults" class="results"></div>
+                    </div>
+                </div>
+
+                <!-- Frequency Tool -->
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <div class="tool-icon">📊</div>
+                        <div>
+                            <h3>Word Frequency</h3>
+                            <p>Analyze word occurrences</p>
+                        </div>
+                    </div>
+                    <div class="tool-body">
+                        <div class="input-group-vertical">
+                            <input 
+                                type="text" 
+                                id="frequencyInput" 
+                                placeholder="Enter a word"
+                                class="input-field"
+                            />
+                            <button id="frequencyBtn" class="btn btn-secondary">Check Frequency</button>
+                        </div>
+                        <div id="frequencyLoading" class="loading hidden">
+                            <div class="spinner"></div>
+                        </div>
+                        <div id="frequencyResults" class="results"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>About This Project</h2>
+                    <p>
+                        The Credit Card Comparison System is an academic project designed to demonstrate 
+                        advanced data structures and algorithms in a practical application.
+                    </p>
+                    <p>
+                        Our system uses sophisticated search algorithms, recommendation engines, and 
+                        natural language processing to help users find the most suitable credit cards 
+                        for their needs.
+                    </p>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <div class="stat-number">1000+</div>
+                            <div class="stat-label">Credit Cards</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">4</div>
+                            <div class="stat-label">Analysis Tools</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">User Profiles</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <div class="tech-stack">
+                        <div class="tech-item">Spring Boot</div>
+                        <div class="tech-item">REST API</div>
+                        <div class="tech-item">Vanilla JS</div>
+                        <div class="tech-item">CSS3</div>
+                        <div class="tech-item">HTML5</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>CardCompare</h4>
+                    <p>Intelligent credit card analysis for smarter financial decisions.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#tools">Tools</a></li>
+                        <li><a href="#about">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Project Info</h4>
+                    <ul>
+                        <li>Academic Project</li>
+                        <li>Spring Boot Backend</li>
+                        <li>RESTful API</li>
+                        <li>Vanilla JavaScript</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Technology</h4>
+                    <ul>
+                        <li>Data Structures</li>
+                        <li>Algorithms</li>
+                        <li>NLP Processing</li>
+                        <li>Search Engine</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Credit Card Comparison System. Academic Project.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>

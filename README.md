@@ -9,7 +9,7 @@ This is a **Java (Spring Boot) backend project** developed as a group assignment
 
 ---
 
-## 🛠 Technologies Used!
+## 🛠 Technologies Used
 
 * Java (Latest LTS)
 * Spring Boot

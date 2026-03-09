@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class TestController {
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "Backend Connected Successfully 🚀";
+    @GetMapping("/test")
+    public String testConnection() {
+        return "Frontend and Backend Connected Successfully 🚀";
     }
 }

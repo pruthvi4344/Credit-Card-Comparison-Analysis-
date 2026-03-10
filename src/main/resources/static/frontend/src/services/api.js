@@ -16,7 +16,12 @@ async function req(url, opts = {}) {
 }
 
 const api = {
-  crawl:           ()         => req('/api/crawl'),
+  crawl:           (banks = []) => {
+    if (!banks.length) return req('/api/crawl');
+    const params = new URLSearchParams();
+    banks.forEach((bank) => params.append('banks', bank));
+    return req(`/api/crawl?${params.toString()}`);
+  },
   spellCheck:      (word)     => req(`/api/spellcheck?word=${encodeURIComponent(word)}`),
   complete:        (prefix)   => req(`/api/complete?prefix=${encodeURIComponent(prefix)}`),
   frequency:       (word)     => req(`/api/frequency?word=${encodeURIComponent(word)}`),

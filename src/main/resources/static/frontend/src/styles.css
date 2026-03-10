@@ -397,6 +397,29 @@ select { appearance: none; cursor: pointer; }
 .input-row { display: flex; gap: 10px; align-items: stretch; }
 .input-row input { flex: 1; }
 
+.bank-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.bank-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  color: var(--text-200);
+}
+
+.bank-option input {
+  width: auto;
+  accent-color: var(--green);
+}
+
 /* ─── BUTTONS ─── */
 .btn {
   display: inline-flex;
@@ -910,6 +933,37 @@ tbody td {
   width: 24px;
   flex-shrink: 0;
   text-align: right;
+}
+
+.crawl-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.crawl-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.crawl-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.crawl-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(0,255,170,0.08);
+  background: rgba(255,255,255,0.02);
 }
 
 /* ─── RANK ROW ─── */

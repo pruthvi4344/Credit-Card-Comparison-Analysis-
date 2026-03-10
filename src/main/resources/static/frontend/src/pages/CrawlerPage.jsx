@@ -4,38 +4,38 @@ import Loader from '../components/Loader.jsx';
 import ErrorMessage from '../components/ErrorMessage.jsx';
 
 const BANKS = ['RBC', 'CIBC', 'TD', 'SCOTIA', 'BMO'];
+const BANK_LABELS = {
+  RBC: 'RBC',
+  CIBC: 'CIBC',
+  TD: 'TD',
+  SCOTIA: 'Scotia',
+  BMO: 'BMO',
+};
 
 export default function CrawlerPage() {
   const [phase, setPhase] = useState('idle');
-  const [selectedBanks, setSelectedBanks] = useState(BANKS);
-  const [results, setResults] = useState([]);
+  const [selectedBank, setSelectedBank] = useState('RBC');
+  const [result, setResult] = useState(null);
   const [summary, setSummary] = useState(null);
   const [err, setErr] = useState('');
-
-  const toggleBank = (bank) => {
-    setSelectedBanks((current) =>
-      current.includes(bank)
-        ? current.filter((item) => item !== bank)
-        : [...current, bank]
-    );
-  };
 
   const start = async () => {
     setPhase('crawling');
     setErr('');
-    setResults([]);
+    setResult(null);
     setSummary(null);
 
     try {
-      const data = await api.crawl(selectedBanks);
-      const bankResults = Array.isArray(data?.results) ? data.results : [];
+      const data = await api.crawl([selectedBank]);
+      const bankResult = Array.isArray(data?.results) ? data.results[0] : null;
 
-      setResults(bankResults);
+      setResult(bankResult);
       setSummary({
-        message: data?.message || 'Crawl completed.',
-        totalCards:
-          data?.totalCards ??
-          bankResults.reduce((sum, item) => sum + (item.cardCount || 0), 0),
+        bank: selectedBank,
+        message: bankResult?.status === 'SUCCESS'
+          ? `Crawl completed for ${BANK_LABELS[selectedBank]}.`
+          : data?.message || `Crawl finished for ${BANK_LABELS[selectedBank]}.`,
+        totalCards: bankResult?.cardCount ?? data?.totalCards ?? 0,
       });
       setPhase('done');
     } catch (e) {
@@ -54,23 +54,26 @@ export default function CrawlerPage() {
 
       <div className="card mb-6 fade-up fade-up-1">
         <div className="card-label">Crawler Control</div>
-        <div className="card-title">Start Crawling Session</div>
+        <div className="card-title">Single Bank Crawl</div>
         <div className="card-desc">
-          Uses Selenium with ChromeDriver to open official bank credit card pages and extract card
-          names and detail links.
+          Select one bank, run the crawler, then review only that bank's extracted card results.
         </div>
 
         <div className="field">
-          <label>Select banks</label>
-          <div className="bank-grid">
+          <label>Select one bank</label>
+          <div className="bank-grid single-bank-grid">
             {BANKS.map((bank) => (
-              <label className="bank-option" key={bank}>
+              <label
+                className={`bank-option single-bank-option${selectedBank === bank ? ' active' : ''}`}
+                key={bank}
+              >
                 <input
-                  type="checkbox"
-                  checked={selectedBanks.includes(bank)}
-                  onChange={() => toggleBank(bank)}
+                  type="radio"
+                  name="selected-bank"
+                  checked={selectedBank === bank}
+                  onChange={() => setSelectedBank(bank)}
                 />
-                <span>{bank === 'SCOTIA' ? 'Scotia' : bank}</span>
+                <span>{BANK_LABELS[bank]}</span>
               </label>
             ))}
           </div>
@@ -79,36 +82,44 @@ export default function CrawlerPage() {
         <button
           className="btn btn-primary btn-lg"
           onClick={start}
-          disabled={phase === 'crawling' || selectedBanks.length === 0}
+          disabled={phase === 'crawling' || !selectedBank}
           style={{ marginBottom: 0 }}
         >
           {phase === 'crawling'
-            ? <><span className="spinner-sm" /> Crawling in progress...</>
-            : 'Start Crawling'}
+            ? <><span className="spinner-sm" /> Crawling {BANK_LABELS[selectedBank]}...</>
+            : `Start ${BANK_LABELS[selectedBank]} Crawl`}
         </button>
 
         <ErrorMessage message={err} />
       </div>
 
-      {phase === 'crawling' && <Loader text="Crawling selected bank websites..." />}
+      {phase === 'crawling' && <Loader text={`Crawling ${BANK_LABELS[selectedBank]} website...`} />}
 
       {phase === 'done' && (
         <div className="fade-up">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div className="section-lbl" style={{ margin: 0, flex: 1 }}>Crawl Results</div>
-            <span className="badge badge-green">{results.length} banks processed</span>
+            <span className="badge badge-green">1 bank processed</span>
           </div>
 
           {summary && (
             <div className="card mb-4">
-              <div className="card-title">Session Summary</div>
-              <div className="card-desc" style={{ marginBottom: 0 }}>
-                {summary.message} Total cards extracted: {summary.totalCards}.
+              <div className="crawl-summary">
+                <div>
+                  <div className="card-title">Session Summary</div>
+                  <div className="card-desc" style={{ marginBottom: 0 }}>
+                    {summary.message}
+                  </div>
+                </div>
+                <div className="crawl-summary-stats">
+                  <span className="badge badge-cyan">{BANK_LABELS[summary.bank]}</span>
+                  <span className="badge badge-green">{summary.totalCards} cards</span>
+                </div>
               </div>
             </div>
           )}
 
-          {results.length === 0 ? (
+          {!result ? (
             <div className="card">
               <div className="empty">
                 <div className="empty-title">Crawl completed with no structured results</div>
@@ -116,58 +127,66 @@ export default function CrawlerPage() {
               </div>
             </div>
           ) : (
-            <div className="grid-auto">
-              {results.map((bankResult) => (
-                <div className="card" key={bankResult.bank}>
-                  <div className="crawl-head">
-                    <div className="card-title" style={{ marginBottom: 0 }}>
-                      {bankResult.bank === 'SCOTIA' ? 'Scotia' : bankResult.bank}
-                    </div>
-                    <span className={`badge ${bankResult.status === 'SUCCESS' ? 'badge-green' : 'badge-red'}`}>
-                      {bankResult.status || 'UNKNOWN'}
-                    </span>
+            <div className="card">
+              <div className="crawl-head">
+                <div>
+                  <div className="card-title" style={{ marginBottom: 4 }}>
+                    {BANK_LABELS[result.bank] || result.bank}
                   </div>
-
-                  <div className="card-desc">
-                    {bankResult.pageTitle || bankResult.message || 'No page title returned'}
+                  <div className="card-desc" style={{ marginBottom: 0 }}>
+                    {result.pageTitle || result.message || 'No page title returned'}
                   </div>
+                </div>
+                <span className={`badge ${result.status === 'SUCCESS' ? 'badge-green' : 'badge-red'}`}>
+                  {result.status || 'UNKNOWN'}
+                </span>
+              </div>
 
-                  <div className="crawl-meta">
-                    <span className="badge badge-cyan">{bankResult.cardCount || 0} cards</span>
-                    <a className="url" href={bankResult.sourceUrl} target="_blank" rel="noopener noreferrer">
-                      {bankResult.sourceUrl}
-                    </a>
-                  </div>
+              <div className="crawl-meta-block">
+                <div className="crawl-meta-pill">
+                  <span className="crawl-meta-label">Source</span>
+                  <a className="url" href={result.sourceUrl} target="_blank" rel="noopener noreferrer">
+                    {result.sourceUrl}
+                  </a>
+                </div>
+                <div className="crawl-meta-pill">
+                  <span className="crawl-meta-label">Extracted</span>
+                  <span>{result.cardCount || 0} cards</span>
+                </div>
+              </div>
 
-                  <div className="divider" />
+              <div className="divider" />
 
-                  {Array.isArray(bankResult.cards) && bankResult.cards.length > 0 ? (
-                    <div className="crawl-cards">
-                      {bankResult.cards.slice(0, 8).map((card, index) => (
-                        <div className="crawl-card-row" key={`${bankResult.bank}-${index}`}>
-                          <span className="crawl-num">{index + 1}</span>
-                          <div className="rank-row-info">
-                            <div>{card.name || 'Unnamed card'}</div>
+              {Array.isArray(result.cards) && result.cards.length > 0 ? (
+                <div className="table-wrap crawl-results-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Card Name</th>
+                        <th>Details URL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.cards.map((card, index) => (
+                        <tr key={`${result.bank}-${index}`}>
+                          <td>{index + 1}</td>
+                          <td>{card.name || 'Unnamed card'}</td>
+                          <td>
                             <a className="url" href={card.detailsUrl} target="_blank" rel="noopener noreferrer">
                               {card.detailsUrl}
                             </a>
-                          </div>
-                        </div>
+                          </td>
+                        </tr>
                       ))}
-
-                      {bankResult.cards.length > 8 && (
-                        <div className="card-desc" style={{ marginBottom: 0 }}>
-                          Showing first 8 cards of {bankResult.cards.length}.
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="empty" style={{ padding: '24px 12px' }}>
-                      <div>No cards extracted for this bank.</div>
-                    </div>
-                  )}
+                    </tbody>
+                  </table>
                 </div>
-              ))}
+              ) : (
+                <div className="empty" style={{ padding: '24px 12px' }}>
+                  <div>No cards extracted for this bank.</div>
+                </div>
+              )}
             </div>
           )}
         </div>

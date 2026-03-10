@@ -172,16 +172,77 @@ public class WebCrawler {
             return false;
         }
 
-        if (lowerName.contains("learn more")
+        if (isNoiseName(lowerName) || isNoiseHref(lowerHref)) {
+            return false;
+        }
+
+        return containsProductSignal(lowerName, lowerHref);
+    }
+
+    private boolean isNoiseName(String lowerName) {
+        return lowerName.contains("learn more")
                 || lowerName.contains("see details")
                 || lowerName.contains("apply now")
                 || lowerName.contains("compare")
                 || lowerName.contains("contact")
-                || lowerName.contains("support")) {
-            return false;
-        }
+                || lowerName.contains("support")
+                || lowerName.contains("faq")
+                || lowerName.contains("frequently asked questions")
+                || lowerName.contains("disclaimer")
+                || lowerName.contains("resource")
+                || lowerName.contains("calculator")
+                || lowerName.contains("statement")
+                || lowerName.contains("payment")
+                || lowerName.contains("protection")
+                || lowerName.contains("help me choose")
+                || lowerName.contains("credit card information")
+                || lowerName.contains("travel cards")
+                || lowerName.contains("rewards cards")
+                || lowerName.contains("cash back cards")
+                || lowerName.contains("low interest cards")
+                || lowerName.contains("student cards")
+                || lowerName.contains("business cards")
+                || lowerName.equals("credit cards")
+                || lowerName.equals("view all credit cards")
+                || lowerName.endsWith(" cards");
+    }
 
-        return containsCardKeyword(lowerName) || lowerHref.contains("credit-card") || lowerHref.contains("credit-cards");
+    private boolean isNoiseHref(String lowerHref) {
+        return lowerHref.contains("#legal")
+                || lowerHref.contains("language-toggle")
+                || lowerHref.contains("/tools/")
+                || lowerHref.contains("/cardholders/")
+                || lowerHref.contains("/product-advice/")
+                || lowerHref.contains("/services/")
+                || lowerHref.contains("/documentation")
+                || lowerHref.contains("/faq")
+                || lowerHref.contains("/frequently-asked-questions")
+                || lowerHref.contains("/optional-add-on-services");
+    }
+
+    private boolean containsProductSignal(String lowerName, String lowerHref) {
+        return lowerName.contains("visa")
+                || lowerName.contains("mastercard")
+                || lowerName.contains("amex")
+                || lowerName.contains("american express")
+                || lowerName.contains("world elite")
+                || lowerName.contains("world ")
+                || lowerName.contains("infinite")
+                || lowerName.contains("platinum")
+                || lowerName.contains("gold")
+                || lowerName.contains("cash back")
+                || lowerName.contains("cashback")
+                || lowerName.contains("low rate")
+                || lowerName.contains("avion")
+                || lowerName.contains("aeroplan")
+                || lowerName.contains("passport")
+                || lowerName.contains("momentum")
+                || lowerName.contains("scene")
+                || lowerName.contains("bonvoy")
+                || lowerName.contains("dividend")
+                || lowerName.contains("eclipse")
+                || lowerHref.matches(".*/credit-cards?/[^/?#]+/[^/?#]+.*")
+                || lowerHref.matches(".*/credit-cards?/[^/?#]+-[^/?#]+.*");
     }
 
     private boolean containsCardKeyword(String value) {
@@ -222,26 +283,22 @@ public class WebCrawler {
 
     private List<String> resolveBanks(List<String> requestedBanks) {
         if (requestedBanks == null || requestedBanks.isEmpty()) {
-            return new ArrayList<>(BANK_URLS.keySet());
+            return List.of("RBC");
         }
 
-        Set<String> banks = new LinkedHashSet<>();
         for (String entry : requestedBanks) {
             if (entry == null || entry.isBlank()) {
                 continue;
             }
 
-            Arrays.stream(entry.split(","))
-                    .map(String::trim)
-                    .filter(value -> !value.isBlank())
-                    .map(value -> value.toUpperCase(Locale.ENGLISH))
-                    .forEach(value -> {
-                        if (BANK_URLS.containsKey(value)) {
-                            banks.add(value);
-                        }
-                    });
+            for (String value : entry.split(",")) {
+                String normalized = value.trim().toUpperCase(Locale.ENGLISH);
+                if (BANK_URLS.containsKey(normalized)) {
+                    return List.of(normalized);
+                }
+            }
         }
 
-        return banks.isEmpty() ? new ArrayList<>(BANK_URLS.keySet()) : new ArrayList<>(banks);
+        return List.of("RBC");
     }
 }

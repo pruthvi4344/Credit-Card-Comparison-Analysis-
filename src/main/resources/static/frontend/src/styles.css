@@ -420,6 +420,23 @@ select { appearance: none; cursor: pointer; }
   accent-color: var(--green);
 }
 
+.single-bank-grid {
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+}
+
+.single-bank-option {
+  justify-content: center;
+  min-height: 48px;
+  transition: all var(--transition);
+}
+
+.single-bank-option.active {
+  border-color: rgba(0,255,170,0.45);
+  background: rgba(0,255,170,0.1);
+  box-shadow: var(--glow-green);
+  color: var(--text-100);
+}
+
 /* ─── BUTTONS ─── */
 .btn {
   display: inline-flex;
@@ -950,6 +967,49 @@ tbody td {
   gap: 12px;
 }
 
+.crawl-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.crawl-summary-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.crawl-meta-block {
+  display: grid;
+  grid-template-columns: 1.7fr 0.6fr;
+  gap: 12px;
+}
+
+.crawl-meta-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,255,170,0.08);
+}
+
+.crawl-meta-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--text-300);
+}
+
+.crawl-results-table td:first-child,
+.crawl-results-table th:first-child {
+  width: 56px;
+  text-align: center;
+}
+
 .crawl-cards {
   display: flex;
   flex-direction: column;
@@ -1007,4 +1067,10 @@ tbody td {
   .sidebar-section { display: none; }
   .main-content { padding: 20px 16px; }
   .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .single-bank-grid,
+  .crawl-meta-block,
+  .crawl-summary {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
 }

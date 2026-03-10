@@ -1,72 +1,117 @@
-import { useEffect, useState } from "react";
-import ResultsTable from "../components/ResultsTable";
-import Loader from "../components/Loader";
-import ErrorMessage from "../components/ErrorMessage";
-import { api } from "../services/api";
+import { useState, useEffect } from 'react';
+import api from '../services/api.js';
+import Loader from '../components/Loader.jsx';
+import ErrorMessage from '../components/ErrorMessage.jsx';
 
-function normalizeHistory(data) {
-  if (Array.isArray(data)) {
-    return data.map((item) => ({
-      keyword: item.keyword ?? item.word ?? String(item),
-      count: item.count ?? item.frequency ?? "-"
-    }));
-  }
+const normalize = (item) => {
+  if (typeof item === 'string') return { word: item, count: 1 };
+  return {
+    word: item.word || item.keyword || item.term || item.query || '',
+    count: item.count || item.frequency || item.searches || item.total || 0,
+  };
+};
 
-  if (data && typeof data === "object") {
-    if (Array.isArray(data.history)) return normalizeHistory(data.history);
-    return Object.entries(data).map(([keyword, count]) => ({
-      keyword,
-      count
-    }));
-  }
+export default function SearchHistoryPage() {
+  const [history, setHistory] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
 
-  return [];
-}
+  const load = async () => {
+    setLoading(true); setErr('');
+    try {
+      const data = await api.searchFrequency();
+      const list = Array.isArray(data)
+        ? data
+        : data?.history || data?.searches || data?.keywords ||
+          (data && typeof data === 'object'
+            ? Object.entries(data).map(([word, count]) => ({ word, count }))
+            : []);
+      setHistory(list.map(normalize).sort((a, b) => b.count - a.count));
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-function SearchHistoryPage() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  useEffect(() => { load(); }, []);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const response = await api.searchFrequency();
-        setRows(normalizeHistory(response));
-      } catch (err) {
-        setError(err.message || "Failed to fetch search history.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
-  }, []);
+  const max = history ? Math.max(...history.map(h => h.count), 1) : 1;
 
   return (
-    <section className="page">
-      <div className="page-header">
-        <h2>Search Frequency</h2>
-        <p>History of searched keywords and usage count.</p>
+    <div>
+      <div className="page-header fade-up">
+        <div className="page-eyebrow">Analytics</div>
+        <div className="page-title">Search History</div>
+        <div className="page-sub">All searched keywords with cumulative frequency counts</div>
       </div>
-      <div className="panel">
-        {loading && <Loader text="Loading search frequency..." />}
-        <ErrorMessage message={error} />
-        {!loading && (
-          <ResultsTable
-            columns={[
-              { key: "keyword", label: "Keyword" },
-              { key: "count", label: "Count" }
-            ]}
-            rows={rows}
-            emptyMessage="No search history available."
-          />
-        )}
+
+      <div style={{ display:'flex', gap:10, marginBottom:20 }} className="fade-up fade-up-1">
+        <button className="btn btn-primary" onClick={load} disabled={loading}>
+          {loading ? <><span className="spinner-sm" /> Refreshing</> : '↻  Refresh'}
+        </button>
+        {history && <span className="badge badge-cyan" style={{ alignSelf:'center' }}>{history.length} entries</span>}
       </div>
-    </section>
+
+      <ErrorMessage message={err} />
+      {loading && <Loader text="Loading search history..." />}
+
+      {!loading && history !== null && (
+        history.length === 0 ? (
+          <div className="card">
+            <div className="empty">
+              <div className="empty-icon">◷</div>
+              <div className="empty-title">No search history yet</div>
+              <div>Start searching keywords to populate this view</div>
+            </div>
+          </div>
+        ) : (
+          <div className="card fade-up" style={{ padding:0 }}>
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ width:50 }}>#</th>
+                  <th>Keyword</th>
+                  <th style={{ width:100 }}>Searches</th>
+                  <th>Frequency Bar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((item, i) => {
+                  const pct = Math.round((item.count / max) * 100);
+                  return (
+                    <tr key={i}>
+                      <td>
+                        <span className={`rank ${['rank-1','rank-2','rank-3'][i] || 'rank-n'}`}>
+                          {i + 1}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ fontFamily:'var(--font-mono)', fontSize:13, color:'var(--text-100)' }}>
+                          {item.word}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="badge badge-green">{item.count}</span>
+                      </td>
+                      <td>
+                        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                          <div className="progress-wrap">
+                            <div className="progress-fill" style={{ width:`${pct}%` }} />
+                          </div>
+                          <span style={{ fontSize:11, color:'var(--text-400)', fontFamily:'var(--font-mono)', width:32 }}>
+                            {pct}%
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+    </div>
   );
 }
-
-export default SearchHistoryPage;

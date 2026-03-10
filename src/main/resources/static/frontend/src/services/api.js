@@ -1,47 +1,30 @@
-const BASE_URL = "http://localhost:8080/api";
+const BASE = 'http://localhost:8080';
 
-async function request(path, options = {}) {
-  const response = await fetch(`${BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    },
-    ...options
-  });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || `Request failed with status ${response.status}`);
+async function req(url, opts = {}) {
+  try {
+    const res = await fetch(`${BASE}${url}`, {
+      headers: { 'Content-Type': 'application/json', ...opts.headers },
+      ...opts,
+    });
+    if (!res.ok) throw new Error(`${res.status} — ${res.statusText}`);
+    const text = await res.text();
+    if (!text) return null;
+    try { return JSON.parse(text); } catch { return text; }
+  } catch (e) {
+    throw new Error(e.message || 'Network error — is the backend running?');
   }
-
-  const contentType = response.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    return response.json();
-  }
-  return response.text();
 }
 
-export const api = {
-  crawl: () => request("/crawl"),
-  spellCheck: (word) =>
-    request(`/spellcheck?word=${encodeURIComponent(word.trim())}`),
-  completeWord: (prefix) =>
-    request(`/complete?prefix=${encodeURIComponent(prefix.trim())}`),
-  frequencyCount: (word) =>
-    request(`/frequency?word=${encodeURIComponent(word.trim())}`),
-  searchFrequency: () => request("/search-frequency"),
-  rankPages: (keyword) =>
-    request(`/rank?keyword=${encodeURIComponent(keyword.trim())}`),
-  searchIndex: (keyword) =>
-    request(`/search?keyword=${encodeURIComponent(keyword.trim())}`),
-  regexValidate: (value, pattern) =>
-    request("/regex/validate", {
-      method: "POST",
-      body: JSON.stringify({ value, pattern })
-    }),
-  regexPatternFind: (text, type) =>
-    request("/regex/pattern", {
-      method: "POST",
-      body: JSON.stringify({ text, type })
-    })
+const api = {
+  crawl:           ()         => req('/api/crawl'),
+  spellCheck:      (word)     => req(`/api/spellcheck?word=${encodeURIComponent(word)}`),
+  complete:        (prefix)   => req(`/api/complete?prefix=${encodeURIComponent(prefix)}`),
+  frequency:       (word)     => req(`/api/frequency?word=${encodeURIComponent(word)}`),
+  searchFrequency: ()         => req('/api/search-frequency'),
+  rank:            (keyword)  => req(`/api/rank?keyword=${encodeURIComponent(keyword)}`),
+  search:          (keyword)  => req(`/api/search?keyword=${encodeURIComponent(keyword)}`),
+  regexValidate:   (body)     => req('/api/regex/validate', { method: 'POST', body: JSON.stringify(body) }),
+  regexPattern:    (body)     => req('/api/regex/pattern',  { method: 'POST', body: JSON.stringify(body) }),
 };
+
+export default api;

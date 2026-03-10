@@ -1,24 +1,27 @@
-function ResultsTable({ columns, rows, emptyMessage = "No data available." }) {
+export default function ResultsTable({ columns, rows }) {
   if (!rows || rows.length === 0) {
-    return <p className="muted-text">{emptyMessage}</p>;
+    return (
+      <div className="empty">
+        <div className="empty-icon">◌</div>
+        <div className="empty-title">No results</div>
+        <div>Try a different query</div>
+      </div>
+    );
   }
-
   return (
-    <div className="table-wrap">
-      <table className="results-table">
+    <div className="table-wrap fade-up">
+      <table>
         <thead>
           <tr>
-            {columns.map((column) => (
-              <th key={column.key}>{column.label}</th>
-            ))}
+            {columns.map(c => <th key={c.key}>{c.label}</th>)}
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, index) => (
-            <tr key={`${index}-${Object.values(row).join("-")}`}>
-              {columns.map((column) => (
-                <td key={`${column.key}-${index}`}>
-                  {row[column.key] ?? "-"}
+          {rows.map((row, i) => (
+            <tr key={i}>
+              {columns.map(c => (
+                <td key={c.key}>
+                  {c.render ? c.render(row[c.key], row, i) : (row[c.key] ?? '—')}
                 </td>
               ))}
             </tr>
@@ -28,5 +31,3 @@ function ResultsTable({ columns, rows, emptyMessage = "No data available." }) {
     </div>
   );
 }
-
-export default ResultsTable;

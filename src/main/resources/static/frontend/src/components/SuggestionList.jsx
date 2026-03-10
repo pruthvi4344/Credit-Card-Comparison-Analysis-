@@ -1,15 +1,24 @@
-function SuggestionList({ items, emptyMessage = "No suggestions yet." }) {
+export default function SuggestionList({ items, onSelect, empty = 'No suggestions found' }) {
   if (!items || items.length === 0) {
-    return <p className="muted-text">{emptyMessage}</p>;
+    return (
+      <div className="empty">
+        <div className="empty-icon">◌</div>
+        <div className="empty-title">{empty}</div>
+      </div>
+    );
   }
-
   return (
-    <ul className="suggestion-list">
-      {items.map((item, index) => (
-        <li key={`${item}-${index}`}>{item}</li>
+    <div className="chip-row fade-up">
+      {items.map((item, i) => (
+        <span
+          key={i}
+          className="chip"
+          onClick={() => onSelect && onSelect(item)}
+          title={`Use: ${item}`}
+        >
+          {item}
+        </span>
       ))}
-    </ul>
+    </div>
   );
 }
-
-export default SuggestionList;

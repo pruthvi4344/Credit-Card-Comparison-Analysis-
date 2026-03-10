@@ -1,6 +1,9 @@
-function ErrorMessage({ message }) {
+export default function ErrorMessage({ message }) {
   if (!message) return null;
-  return <p className="error-message">{message}</p>;
+  return (
+    <div className="alert alert-error fade-up">
+      <span className="alert-icon">⚠</span>
+      <span>{message}</span>
+    </div>
+  );
 }
-
-export default ErrorMessage;

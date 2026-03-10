@@ -1,39 +1,40 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
-import DashboardPage from "./pages/DashboardPage";
-import CrawlerPage from "./pages/CrawlerPage";
-import SearchPage from "./pages/SearchPage";
-import SpellCheckPage from "./pages/SpellCheckPage";
-import WordCompletionPage from "./pages/WordCompletionPage";
-import FrequencyPage from "./pages/FrequencyPage";
-import SearchHistoryPage from "./pages/SearchHistoryPage";
-import RankingPage from "./pages/RankingPage";
-import RegexToolsPage from "./pages/RegexToolsPage";
+import { useState } from 'react';
+import './styles.css';
+import Navbar from './components/Navbar.jsx';
+import Sidebar from './components/Sidebar.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
+import CrawlerPage from './pages/CrawlerPage.jsx';
+import SearchPage from './pages/SearchPage.jsx';
+import SpellCheckPage from './pages/SpellCheckPage.jsx';
+import WordCompletionPage from './pages/WordCompletionPage.jsx';
+import FrequencyPage from './pages/FrequencyPage.jsx';
+import SearchHistoryPage from './pages/SearchHistoryPage.jsx';
+import RankingPage from './pages/RankingPage.jsx';
+import RegexToolsPage from './pages/RegexToolsPage.jsx';
 
-function App() {
+const PAGES = {
+  dashboard:  DashboardPage,
+  crawler:    CrawlerPage,
+  search:     SearchPage,
+  spellcheck: SpellCheckPage,
+  completion: WordCompletionPage,
+  frequency:  FrequencyPage,
+  history:    SearchHistoryPage,
+  ranking:    RankingPage,
+  regex:      RegexToolsPage,
+};
+
+export default function App() {
+  const [page, setPage] = useState('dashboard');
+  const Page = PAGES[page] || DashboardPage;
+
   return (
-    <div className="app-shell">
+    <div className="app">
       <Navbar />
-      <div className="layout">
-        <Sidebar />
-        <main className="content">
-          <Routes>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/crawler" element={<CrawlerPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/spell-check" element={<SpellCheckPage />} />
-            <Route path="/word-completion" element={<WordCompletionPage />} />
-            <Route path="/frequency" element={<FrequencyPage />} />
-            <Route path="/search-frequency" element={<SearchHistoryPage />} />
-            <Route path="/ranking" element={<RankingPage />} />
-            <Route path="/regex-tools" element={<RegexToolsPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
+      <Sidebar active={page} onNav={setPage} />
+      <main className="main-content">
+        <Page onNav={setPage} />
+      </main>
     </div>
   );
 }
-
-export default App;

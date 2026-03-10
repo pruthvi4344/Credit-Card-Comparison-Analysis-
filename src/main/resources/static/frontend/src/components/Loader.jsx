@@ -1,10 +1,8 @@
-function Loader({ text = "Loading..." }) {
+export default function Loader({ text = 'Processing...' }) {
   return (
-    <div className="loader-wrap">
-      <div className="loader" />
+    <div className="loader fade-up">
+      <div className="spinner-ring" />
       <span>{text}</span>
     </div>
   );
 }
-
-export default Loader;

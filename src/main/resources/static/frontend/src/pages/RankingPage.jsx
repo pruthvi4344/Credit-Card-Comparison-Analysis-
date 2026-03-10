@@ -1,82 +1,117 @@
-import { useState } from "react";
-import SearchBox from "../components/SearchBox";
-import ResultsTable from "../components/ResultsTable";
-import Loader from "../components/Loader";
-import ErrorMessage from "../components/ErrorMessage";
-import { api } from "../services/api";
+import { useState } from 'react';
+import api from '../services/api.js';
+import SearchBox from '../components/SearchBox.jsx';
+import Loader from '../components/Loader.jsx';
+import ErrorMessage from '../components/ErrorMessage.jsx';
 
-function normalizeRankings(data) {
-  const list = Array.isArray(data)
-    ? data
-    : Array.isArray(data?.rankings)
-      ? data.rankings
-      : Array.isArray(data?.data)
-        ? data.data
-        : data
-          ? [data]
-          : [];
+const normalize = (item) => {
+  if (typeof item === 'string') return { url: item, score: '', occurrences: '' };
+  return {
+    url: item.url || item.page || item.link || '',
+    score: item.score ?? item.rank ?? item.relevance ?? '',
+    occurrences: item.occurrences ?? item.count ?? item.frequency ?? '',
+  };
+};
 
-  return list.map((item, index) => {
-    if (typeof item === "string") {
-      return { rank: index + 1, page: item, occurrences: "-" };
-    }
-    return {
-      rank: item.rank ?? index + 1,
-      page: item.url ?? item.page ?? item.title ?? "Page",
-      occurrences: item.occurrences ?? item.score ?? item.count ?? "-"
-    };
-  });
-}
+const rankClass = (i) => ['rank-1','rank-2','rank-3'][i] || 'rank-n';
 
-function RankingPage() {
-  const [keyword, setKeyword] = useState("");
-  const [rows, setRows] = useState([]);
+export default function RankingPage() {
+  const [kw, setKw] = useState('');
+  const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [err, setErr] = useState('');
 
-  const handleRank = async () => {
-    if (!keyword.trim()) return;
-    setLoading(true);
-    setError("");
+  const run = async () => {
+    if (!kw.trim()) return;
+    setLoading(true); setErr(''); setResults(null);
     try {
-      const response = await api.rankPages(keyword);
-      setRows(normalizeRankings(response));
-    } catch (err) {
-      setError(err.message || "Failed to fetch rankings.");
+      const data = await api.rank(kw);
+      const list = Array.isArray(data) ? data
+        : data?.rankings || data?.pages || data?.results || [];
+      setResults(list.map(normalize));
+    } catch (e) {
+      setErr(e.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const maxScore = results ? Math.max(...results.map(r => Number(r.score) || 0), 1) : 1;
+
   return (
-    <section className="page">
-      <div className="page-header">
-        <h2>Page Ranking</h2>
-        <p>Rank pages based on keyword occurrence and relevance.</p>
+    <div>
+      <div className="page-header fade-up">
+        <div className="page-eyebrow">Analytics — TF-IDF / Page Score</div>
+        <div className="page-title">Page Ranking</div>
+        <div className="page-sub">Rank indexed pages by keyword relevance and occurrence score</div>
       </div>
-      <div className="panel">
+
+      <div className="card mb-6 fade-up fade-up-1">
+        <div className="card-label">Ranking Query</div>
+        <div className="card-title">Enter a Keyword to Rank</div>
+        <div className="card-desc">Pages are scored and sorted by relevance for the given keyword</div>
         <SearchBox
-          label="Ranking keyword"
-          value={keyword}
-          onChange={setKeyword}
-          placeholder="e.g. rewards"
-          buttonText="Rank Pages"
-          onSubmit={handleRank}
+          value={kw}
+          onChange={setKw}
+          onSearch={run}
+          placeholder="e.g. cashback, APR, annual fee..."
+          loading={loading}
+          btnLabel="▲  Rank"
         />
-        {loading && <Loader text="Ranking pages..." />}
-        <ErrorMessage message={error} />
-        <ResultsTable
-          columns={[
-            { key: "rank", label: "Rank" },
-            { key: "page", label: "Page" },
-            { key: "occurrences", label: "Occurrences / Score" }
-          ]}
-          rows={rows}
-          emptyMessage="No ranking results yet."
-        />
+        <ErrorMessage message={err} />
       </div>
-    </section>
+
+      {loading && <Loader text="Ranking pages..." />}
+
+      {!loading && results !== null && (
+        <div className="fade-up">
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+            <div className="section-lbl" style={{ margin:0, flex:1 }}>Rankings for &ldquo;{kw}&rdquo;</div>
+            <span className="badge badge-cyan">{results.length} pages</span>
+          </div>
+
+          {results.length === 0 ? (
+            <div className="card">
+              <div className="empty">
+                <div className="empty-icon">▲</div>
+                <div className="empty-title">No ranked pages found</div>
+                <div>Try a different keyword or crawl first</div>
+              </div>
+            </div>
+          ) : (
+            results.map((r, i) => {
+              const pct = r.score ? Math.round((Number(r.score) / maxScore) * 100) : null;
+              return (
+                <div className="rank-row" key={i}>
+                  <span className={`rank ${rankClass(i)}`} style={{ width:36, height:36 }}>{i + 1}</span>
+                  <div className="rank-row-info">
+                    <a className="url" href={r.url} target="_blank" rel="noopener noreferrer"
+                      style={{ maxWidth:'100%', marginBottom: pct !== null ? 8 : 0, display:'block' }}>
+                      {r.url || '—'}
+                    </a>
+                    {pct !== null && (
+                      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                        <div className="progress-wrap" style={{ width:180 }}>
+                          <div className="progress-fill" style={{ width:`${pct}%` }} />
+                        </div>
+                        <span style={{ fontSize:11, color:'var(--text-400)', fontFamily:'var(--font-mono)' }}>
+                          Score: {r.score}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {r.occurrences !== '' && (
+                    <div className="rank-row-score">
+                      <div className="score-val">{r.occurrences}</div>
+                      <div className="score-lbl">Hits</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
   );
 }
-
-export default RankingPage;

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class WebCrawler {
@@ -36,6 +37,8 @@ public class WebCrawler {
             "SCOTIA", "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
             "BMO", "https://www.bmo.com/main/personal/credit-cards/all-cards/"
     );
+
+    private final Map<String, String> crawledPages = new ConcurrentHashMap<>();
 
     public Map<String, Object> startCrawling(List<String> requestedBanks) {
         List<String> banksToCrawl = resolveBanks(requestedBanks);
@@ -100,8 +103,10 @@ public class WebCrawler {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
 
-            Document document = Jsoup.parse(driver.getPageSource(), url);
+            String pageSource = driver.getPageSource();
+            Document document = Jsoup.parse(pageSource, url);
             List<CreditCard> cards = extractCreditCards(bank, url, document);
+            crawledPages.put(bank, document.text());
 
             result.put("status", "SUCCESS");
             result.put("pageTitle", driver.getTitle());
@@ -115,6 +120,10 @@ public class WebCrawler {
         }
 
         return result;
+    }
+
+    public Map<String, String> getCrawledPages() {
+        return new LinkedHashMap<>(crawledPages);
     }
 
     private List<CreditCard> extractCreditCards(String bank, String sourceUrl, Document document) {

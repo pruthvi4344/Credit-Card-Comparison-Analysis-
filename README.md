@@ -1,139 +1,270 @@
-# 💳 Credit Card Comparison Analysis
+# Credit Card Comparison & Web Search Engine
 
-## 📌 Project Overview
+## Overview
 
-This project analyzes and compares different **credit card offerings** from multiple providers (CIBC, RBC, TD, Scotiabank, Capital One, etc.).
-It extracts data using a **web crawler**, processes and indexes information, and recommends the best credit card based on user preferences.
+This project is a university group project built with:
 
-This is a **Java (Spring Boot) backend project** developed as a group assignment for applying data structures and algorithms in a real system.
+- `Spring Boot` for the backend
+- `React + Vite` for the frontend
+- `Selenium + ChromeDriver` for web crawling
 
----
+The system supports:
 
-## 🛠 Technologies Used
+- crawling bank credit card pages
+- keyword frequency counting
+- search history tracking
+- frontend dashboard integration
 
-* Java (Latest LTS)
-* Spring Boot
-* Maven
-* JSoup (HTML Parsing)
-* Git & GitHub
-* VS Code / Eclipse
+## Project Structure
 
----
-
-## 📁 Project Structure
-
-```
+```text
 comparison/
-│
-├── src/main/java/com/creditcard/comparison/
-│   ├── controller/        # REST APIs
-│   ├── crawler/           # Web crawling logic
-│   ├── parser/            # HTML parsing & extraction
-│   ├── index/             # Inverted index & search
-│   ├── recommendation/    # Recommendation engine
-│   ├── spellcheck/        # Spell checking
-│   ├── model/             # Data models
-│   ├── util/              # Utilities & regex validation
-│   └── ComparisonApplication.java
-│
-├── src/main/resources/
-│   └── application.properties
-│
-├── data/                  # Crawled HTML / extracted text
-├── pom.xml
-└── README.md
+|-- src/main/java/com/creditcard/comparison/
+|   |-- config/
+|   |-- controller/
+|   |-- crawler/
+|   |-- index/
+|   |-- model/
+|   |-- parser/
+|   |-- recommendation/
+|   |-- spellcheck/
+|   |-- util/
+|-- src/main/resources/
+|   |-- application.properties
+|   |-- static/
+|   |   |-- frontend/
+|-- data/
+|-- pom.xml
+|-- README.md
 ```
 
----
+## Requirements
 
-## ⚙️ Requirements
+Install these on your PC before running the project:
 
-Make sure the following are installed:
+- `Java JDK 21+`
+- `Maven 3.9+`
+- `Node.js 18+`
+- `Git`
+- `Google Chrome`
+- `ChromeDriver`
 
-* Java (JDK 21 or latest) → `java -version`
-* Maven → `mvn -version`
-* Git
-* VS Code
+Check installed versions:
 
----
+```powershell
+java -version
+mvn -version
+node -v
+npm -v
+git --version
+```
 
-## 🚀 Setup Instructions (For Team Members)
+## ChromeDriver Setup
 
-### 1️⃣ Clone Repository
+This project currently uses this ChromeDriver path in the crawler:
 
-```bash
+```java
+System.setProperty("webdriver.chrome.driver","C:\\chromedriver\\chromedriver.exe");
+```
+
+On a teammate PC:
+
+1. Install ChromeDriver that matches the installed Chrome version.
+2. Create folder `C:\chromedriver\`
+3. Place `chromedriver.exe` inside that folder.
+
+If the path is different on another machine, update it in:
+
+- [WebCrawler.java](d:\Acc Proejct\comparison\src\main\java\com\creditcard\comparison\crawler\WebCrawler.java)
+
+## Clone the Project
+
+```powershell
 git clone https://github.com/pruthvi4344/Credit-Card-Comparison-Analysis-.git
 cd comparison
 ```
 
----
+## Install Dependencies
 
-### 2️⃣ Install Dependencies
+Backend:
 
-```bash
+```powershell
 mvn clean install
 ```
 
----
+Frontend:
 
-### 3️⃣ Run Project
+```powershell
+cd src\main\resources\static\frontend
+npm install
+cd ..\..\..\..\..
+```
 
-```bash
+## Run the Project
+
+You need two terminals.
+
+### Terminal 1: Run backend
+
+From project root:
+
+```powershell
 mvn spring-boot:run
 ```
 
----
+Backend runs on:
 
-### 4️⃣ Open in Browser
-
-```
+```text
 http://localhost:8080
 ```
 
-You should see:
+### Terminal 2: Run frontend
 
-```
-Credit Card Comparison System is Running 🚀
-```
-
----
-
-## 🌐 GitHub Workflow (Important)
-
-### Create Your Branch
-
-all the branches are created for all members
-
-```bash
-git checkout -b feature-name
+```powershell
+cd src\main\resources\static\frontend
+npm run dev
 ```
 
-### Commit & Push
+Frontend usually runs on:
 
-```bash
-git add .
-git commit -m "Feature update"
-git push origin feature-name
+```text
+http://localhost:3000
 ```
 
-Then create **Pull Request → Merge to main**
----
+If Vite starts on another port, open the URL shown in the terminal.
 
-## 🧪 Testing
+## How to Use
 
-```bash
-mvn test
+1. Start backend
+2. Start frontend
+3. Open frontend in browser
+4. First run the crawler
+5. Then test frequency/search history features
 
----
+Important:
 
-## ⭐ Notes
+- `Frequency Counter` depends on crawled page content
+- `Search History` is populated after frequency/search requests
 
-* Each member must work in **separate branch**
-* Do NOT push directly to `main`
-* Always pull latest changes before working:
+## Useful API Endpoints
 
-```bash
+```text
+GET  /api/test
+GET  /api/crawl?banks=RBC
+GET  /api/frequency?word=cashback
+GET  /api/search-frequency
+```
+
+Example:
+
+```text
+http://localhost:8080/api/frequency?word=cashback
+```
+
+## Git Workflow
+
+Do not work directly on `main`.
+
+Before writing code, always checkout your own branch first.
+
+### First time setup
+
+```powershell
+git fetch origin
+git checkout main
 git pull origin main
+git checkout -b your-name-feature
+git push -u origin your-name-feature
 ```
 
----
+### Every time before starting work
+
+```powershell
+git fetch origin
+git checkout your-name-feature
+git pull origin your-name-feature
+```
+
+If you need the latest `main` changes in your branch:
+
+```powershell
+git checkout main
+git pull origin main
+git checkout your-name-feature
+git merge main
+```
+
+### Commit and push your work
+
+```powershell
+git checkout your-name-feature
+git add .
+git commit -m "Add frequency count feature"
+git push origin your-name-feature
+```
+
+### Create Pull Request
+
+After pushing:
+
+1. Open GitHub
+2. Create a Pull Request from your branch to `main`
+3. Get it reviewed
+4. Merge only through Pull Request
+
+## Important Team Rules
+
+- Always checkout your branch before working on code
+- Never push directly to `main`
+- Never commit unfinished broken code if avoidable
+- Pull latest changes before starting work
+- Use Pull Requests for merging to `main`
+
+## Recommended Commands Summary
+
+```powershell
+git fetch origin
+git checkout your-name-feature
+git pull origin your-name-feature
+```
+
+```powershell
+git add .
+git commit -m "Your update message"
+git push origin your-name-feature
+```
+
+## Troubleshooting
+
+### `404` on frequency or search history
+
+Restart the backend after pulling latest code:
+
+```powershell
+mvn spring-boot:run
+```
+
+### `Failed to fetch` in frontend
+
+Check:
+
+- backend is running on `localhost:8080`
+- frontend is running
+- no old backend instance is still running
+
+### ChromeDriver error
+
+Check:
+
+- `chromedriver.exe` exists at `C:\chromedriver\chromedriver.exe`
+- ChromeDriver version matches installed Chrome
+
+## Team Note
+
+Before starting any task:
+
+```powershell
+git checkout your-name-feature
+```
+
+Do not start coding on `main`.

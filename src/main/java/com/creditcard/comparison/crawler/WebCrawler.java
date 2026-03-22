@@ -1,6 +1,14 @@
 package com.creditcard.comparison.crawler;
 
-import com.creditcard.comparison.model.CreditCard;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,18 +21,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.creditcard.comparison.model.CreditCard;
+import com.creditcard.comparison.parser.HtmlParser;
 @Service
 public class WebCrawler {
 
@@ -106,7 +104,9 @@ public class WebCrawler {
             String pageSource = driver.getPageSource();
             Document document = Jsoup.parse(pageSource, url);
             List<CreditCard> cards = extractCreditCards(bank, url, document);
-            crawledPages.put(bank, document.text());
+            HtmlParser parser = new HtmlParser();
+            String cleanText = parser.parseHtml(pageSource);
+            crawledPages.put(bank, cleanText);
 
             result.put("status", "SUCCESS");
             result.put("pageTitle", driver.getTitle());

@@ -1,36 +1,8 @@
 import { useState } from 'react';
 import api from '../services/api.js';
 import SearchBox from '../components/SearchBox.jsx';
-import ResultsTable from '../components/ResultsTable.jsx';
 import Loader from '../components/Loader.jsx';
 import ErrorMessage from '../components/ErrorMessage.jsx';
-
-const normalize = (item) => {
-  if (typeof item === 'string') return { url: item, snippet: '', score: '' };
-  return {
-    url: item.url || item.page || item.link || '',
-    snippet: item.snippet || item.content || item.description || item.text || '',
-    score: item.score ?? item.rank ?? item.relevance ?? '',
-  };
-};
-
-const cols = [
-  {
-    key: '_rank', label: '#',
-    render: (_, __, i) => (
-      <span className={`rank ${['rank-1','rank-2','rank-3'][i] || 'rank-n'}`}>{i + 1}</span>
-    ),
-  },
-  {
-    key: 'url', label: 'Page URL',
-    render: (v) => <a className="url" href={v} target="_blank" rel="noopener noreferrer">{v || '—'}</a>,
-  },
-  { key: 'snippet', label: 'Snippet' },
-  {
-    key: 'score', label: 'Score',
-    render: (v) => v !== '' ? <span className="badge badge-green">{v}</span> : '—',
-  },
-];
 
 export default function SearchPage() {
   const [kw, setKw] = useState('');
@@ -40,13 +12,13 @@ export default function SearchPage() {
 
   const search = async () => {
     if (!kw.trim()) return;
-    setLoading(true); setErr(''); setRows(null);
+    setLoading(true);
+    setErr('');
+    setRows(null);
     try {
       const data = await api.search(kw);
-      const list = Array.isArray(data)
-        ? data
-        : data?.results || data?.pages || data?.urls || [];
-      setRows(list.map(n => ({ ...normalize(n), _rank: null })));
+      const list = Array.isArray(data) ? data : data?.results || [];
+      setRows(list);
     } catch (e) {
       setErr(e.message);
     } finally {
@@ -59,20 +31,20 @@ export default function SearchPage() {
       <div className="page-header fade-up">
         <div className="page-eyebrow">Inverted Index</div>
         <div className="page-title">Keyword Search</div>
-        <div className="page-sub">Fast full-text search across all crawled and indexed pages</div>
+        <div className="page-sub">Search the indexed card catalog and return full card results</div>
       </div>
 
       <div className="card mb-6 fade-up fade-up-1">
         <div className="card-label">Search Interface</div>
-        <div className="card-title">Enter a Keyword</div>
-        <div className="card-desc">Search through the inverted index built from crawled pages</div>
+        <div className="card-title">Inverse Page Index Search</div>
+        <div className="card-desc">Enter a keyword like `gold`, `travel`, `cashback`, or `visa`.</div>
         <SearchBox
           value={kw}
           onChange={setKw}
           onSearch={search}
-          placeholder="e.g. cashback, annual fee, travel rewards..."
+          placeholder="e.g. gold, travel, cashback..."
           loading={loading}
-          btnLabel="⌕  Search"
+          btnLabel="Search"
         />
         <ErrorMessage message={err} />
       </div>
@@ -81,11 +53,66 @@ export default function SearchPage() {
 
       {!loading && rows !== null && (
         <div className="fade-up">
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
-            <div className="section-lbl" style={{ margin:0, flex:1 }}>Results for &ldquo;{kw}&rdquo;</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div className="section-lbl" style={{ margin: 0, flex: 1 }}>Results for "{kw}"</div>
             <span className="badge badge-cyan">{rows.length} found</span>
           </div>
-          <ResultsTable columns={cols} rows={rows} />
+
+          {rows.length === 0 ? (
+            <div className="card">
+              <div className="empty">
+                <div className="empty-title">No matching cards found</div>
+                <div>Try another keyword from card titles or benefits.</div>
+              </div>
+            </div>
+          ) : (
+            <div className="catalog-grid fade-up">
+              {rows.map((card, index) => (
+                <article className="catalog-card" key={`${card.title}-${index}`}>
+                  <div className="catalog-card-top">
+                    <span className="badge badge-cyan">{card.bank || 'Bank'}</span>
+                    <span className="badge badge-green">{card.annualFees || 'Fee N/A'}</span>
+                  </div>
+
+                  <div className="catalog-image-wrap">
+                    {card.imageUrl ? (
+                      <img
+                        src={card.imageUrl}
+                        alt={card.title}
+                        className="catalog-card-image"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="catalog-image-fallback">No Image</div>
+                    )}
+                  </div>
+
+                  <div className="catalog-card-body">
+                    <h3 className="catalog-card-title">{card.title}</h3>
+                    <div className="catalog-chip-row">
+                      <span className="catalog-chip">Annual Fee: {card.annualFees || 'N/A'}</span>
+                      <span className="catalog-chip">Purchase: {card.purchaseInterestRate || 'N/A'}</span>
+                      <span className="catalog-chip">Cash: {card.cashInterestRate || 'N/A'}</span>
+                    </div>
+                    <p className="catalog-card-benefits">
+                      <strong>Benefit:</strong> {card.productValueProp || card.productBenefits || 'No summary available.'}
+                    </p>
+                  </div>
+
+                  <div className="catalog-card-footer">
+                    <a
+                      className="btn btn-primary btn-sm"
+                      href={card.detailsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View Card
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

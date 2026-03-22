@@ -3,6 +3,10 @@ import './styles.css';
 import Navbar from './components/Navbar.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
+import AllCardsPage from './pages/AllCardsPage.jsx';
+import ComparePage from './pages/ComparePage.jsx';
+import RecommendationsPage from './pages/RecommendationsPage.jsx';
+import BankAnalyticsPage from './pages/BankAnalyticsPage.jsx';
 import CrawlerPage from './pages/CrawlerPage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
 import SpellCheckPage from './pages/SpellCheckPage.jsx';
@@ -13,15 +17,19 @@ import RankingPage from './pages/RankingPage.jsx';
 import RegexToolsPage from './pages/RegexToolsPage.jsx';
 
 const PAGES = {
-  dashboard:  DashboardPage,
-  crawler:    CrawlerPage,
-  search:     SearchPage,
+  dashboard: DashboardPage,
+  allcards: AllCardsPage,
+  compare: ComparePage,
+  recommendations: RecommendationsPage,
+  analytics: BankAnalyticsPage,
+  crawler: CrawlerPage,
+  search: SearchPage,
   spellcheck: SpellCheckPage,
   completion: WordCompletionPage,
-  frequency:  FrequencyPage,
-  history:    SearchHistoryPage,
-  ranking:    RankingPage,
-  regex:      RegexToolsPage,
+  frequency: FrequencyPage,
+  history: SearchHistoryPage,
+  ranking: RankingPage,
+  regex: RegexToolsPage,
 };
 
 export default function App() {

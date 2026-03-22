@@ -1,82 +1,48 @@
 package com.creditcard.comparison.model;
 
-public class CreditCard {
+public class CardCatalogItem {
 
-    private String bank;
-    private String name;
-    private String detailsUrl;
-    private String sourceUrl;
+    private String title;
     private String imageUrl;
     private String annualFees;
     private String purchaseInterestRate;
     private String cashInterestRate;
     private String productValueProp;
     private String productBenefits;
+    private String bank;
+    private String detailsUrl;
 
-    public CreditCard() {
+    public CardCatalogItem() {
     }
 
-    public CreditCard(String bank, String name, String detailsUrl, String sourceUrl) {
-        this.bank = bank;
-        this.name = name;
-        this.detailsUrl = detailsUrl;
-        this.sourceUrl = sourceUrl;
-    }
-
-    public CreditCard(
-            String bank,
-            String name,
-            String detailsUrl,
-            String sourceUrl,
+    public CardCatalogItem(
+            String title,
             String imageUrl,
             String annualFees,
             String purchaseInterestRate,
             String cashInterestRate,
             String productValueProp,
-            String productBenefits
+            String productBenefits,
+            String bank,
+            String detailsUrl
     ) {
-        this.bank = bank;
-        this.name = name;
-        this.detailsUrl = detailsUrl;
-        this.sourceUrl = sourceUrl;
+        this.title = title;
         this.imageUrl = imageUrl;
         this.annualFees = annualFees;
         this.purchaseInterestRate = purchaseInterestRate;
         this.cashInterestRate = cashInterestRate;
         this.productValueProp = productValueProp;
         this.productBenefits = productBenefits;
-    }
-
-    public String getBank() {
-        return bank;
-    }
-
-    public void setBank(String bank) {
         this.bank = bank;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDetailsUrl() {
-        return detailsUrl;
-    }
-
-    public void setDetailsUrl(String detailsUrl) {
         this.detailsUrl = detailsUrl;
     }
 
-    public String getSourceUrl() {
-        return sourceUrl;
+    public String getTitle() {
+        return title;
     }
 
-    public void setSourceUrl(String sourceUrl) {
-        this.sourceUrl = sourceUrl;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getImageUrl() {
@@ -125,5 +91,21 @@ public class CreditCard {
 
     public void setProductBenefits(String productBenefits) {
         this.productBenefits = productBenefits;
+    }
+
+    public String getBank() {
+        return bank;
+    }
+
+    public void setBank(String bank) {
+        this.bank = bank;
+    }
+
+    public String getDetailsUrl() {
+        return detailsUrl;
+    }
+
+    public void setDetailsUrl(String detailsUrl) {
+        this.detailsUrl = detailsUrl;
     }
 }

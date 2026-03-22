@@ -163,7 +163,12 @@ export default function CrawlerPage() {
                     <thead>
                       <tr>
                         <th>#</th>
+                        <th>Image</th>
                         <th>Card Name</th>
+                        <th>Annual Fee</th>
+                        <th>Purchase Rate</th>
+                        <th>Cash Rate</th>
+                        <th>Value</th>
                         <th>Details URL</th>
                       </tr>
                     </thead>
@@ -171,7 +176,23 @@ export default function CrawlerPage() {
                       {result.cards.map((card, index) => (
                         <tr key={`${result.bank}-${index}`}>
                           <td>{index + 1}</td>
+                          <td>
+                            {card.imageUrl ? (
+                              <img
+                                src={card.imageUrl}
+                                alt={card.name || 'Card image'}
+                                className="crawl-card-thumb"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <span className="muted-mini">No image</span>
+                            )}
+                          </td>
                           <td>{card.name || 'Unnamed card'}</td>
+                          <td>{card.annualFees || '-'}</td>
+                          <td>{card.purchaseInterestRate || '-'}</td>
+                          <td>{card.cashInterestRate || '-'}</td>
+                          <td className="crawl-value-cell">{card.productValueProp || '-'}</td>
                           <td>
                             <a className="url" href={card.detailsUrl} target="_blank" rel="noopener noreferrer">
                               {card.detailsUrl}

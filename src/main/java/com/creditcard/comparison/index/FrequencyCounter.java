@@ -1,43 +1,80 @@
 package com.creditcard.comparison.index;
 
+import com.creditcard.comparison.model.CardCatalogItem;
+import com.creditcard.comparison.service.CardCatalogService;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 public class FrequencyCounter {
 
+    private final CardCatalogService cardCatalogService;
     private final HashMap<String, Integer> searchHistory = new HashMap<>();
+    private final Map<String, Map<String, Integer>> frequencyIndex = new HashMap<>();
+    private final Map<String, CardCatalogItem> cardLookup = new LinkedHashMap<>();
 
-    public Map<String, Integer> countWordFrequency(String keyword, Map<String, String> pages) {
-        HashMap<String, Integer> frequencyByPage = new HashMap<>();
-        String normalizedKeyword = normalizeKeyword(keyword);
+    public FrequencyCounter(CardCatalogService cardCatalogService) {
+        this.cardCatalogService = cardCatalogService;
+    }
 
-        if (normalizedKeyword.isEmpty() || pages == null || pages.isEmpty()) {
-            return frequencyByPage;
-        }
+    @PostConstruct
+    public void buildFrequencyIndex() {
+        frequencyIndex.clear();
+        cardLookup.clear();
 
-        for (Map.Entry<String, String> pageEntry : pages.entrySet()) {
-            String pageName = pageEntry.getKey();
-            String pageContent = pageEntry.getValue();
-            int count = 0;
+        for (CardCatalogItem card : cardCatalogService.getAllCards()) {
+            String cardKey = buildCardKey(card);
+            cardLookup.put(cardKey, card);
 
-            if (pageContent != null && !pageContent.isBlank()) {
-                String[] words = pageContent.toLowerCase(Locale.ENGLISH).split("[^a-z0-9]+");
-                for (String word : words) {
-                    if (normalizedKeyword.equals(word)) {
-                        count++;
-                    }
+            String combinedText = String.join(" ",
+                    safe(card.getTitle()),
+                    safe(card.getAnnualFees()),
+                    safe(card.getPurchaseInterestRate()),
+                    safe(card.getCashInterestRate()),
+                    safe(card.getProductValueProp()),
+                    safe(card.getProductBenefits()),
+                    safe(card.getBank())
+            ).toLowerCase(Locale.ENGLISH);
+
+            String[] words = combinedText.split("[^a-z0-9]+");
+            Map<String, Integer> perCardCounts = new HashMap<>();
+
+            for (String word : words) {
+                if (word == null || word.isBlank()) {
+                    continue;
                 }
+                perCardCounts.put(word, perCardCounts.getOrDefault(word, 0) + 1);
             }
 
-            frequencyByPage.put(pageName, count);
+            for (Map.Entry<String, Integer> entry : perCardCounts.entrySet()) {
+                frequencyIndex
+                        .computeIfAbsent(entry.getKey(), ignored -> new LinkedHashMap<>())
+                        .put(cardKey, entry.getValue());
+            }
+        }
+    }
+
+    public Map<String, Integer> countWordFrequency(String keyword) {
+        Map<String, Integer> frequencyByCard = new LinkedHashMap<>();
+        String normalizedKeyword = normalizeKeyword(keyword);
+
+        if (normalizedKeyword.isEmpty()) {
+            return frequencyByCard;
         }
 
-        return frequencyByPage;
+        Map<String, Integer> indexedCounts = frequencyIndex.getOrDefault(normalizedKeyword, Map.of());
+        frequencyByCard.putAll(new TreeMap<>(indexedCounts));
+        return frequencyByCard;
+    }
+
+    public CardCatalogItem getCardByKey(String cardKey) {
+        return cardLookup.get(cardKey);
     }
 
     public void updateSearchFrequency(String keyword) {
@@ -58,5 +95,13 @@ public class FrequencyCounter {
             return "";
         }
         return keyword.toLowerCase(Locale.ENGLISH).replaceAll("[^a-z0-9]+", "").trim();
+    }
+
+    private String buildCardKey(CardCatalogItem card) {
+        return safe(card.getTitle()) + "||" + safe(card.getDetailsUrl());
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value.trim();
     }
 }

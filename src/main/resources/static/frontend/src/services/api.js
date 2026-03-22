@@ -6,12 +6,12 @@ async function req(url, opts = {}) {
       headers: { 'Content-Type': 'application/json', ...opts.headers },
       ...opts,
     });
-    if (!res.ok) throw new Error(`${res.status} — ${res.statusText}`);
+    if (!res.ok) throw new Error(`${res.status} - ${res.statusText}`);
     const text = await res.text();
     if (!text) return null;
     try { return JSON.parse(text); } catch { return text; }
   } catch (e) {
-    throw new Error(e.message || 'Network error — is the backend running?');
+    throw new Error(e.message || 'Network error - is the backend running?');
   }
 }
 
@@ -22,7 +22,9 @@ const api = {
     banks.forEach((bank) => params.append('banks', bank));
     return req(`/api/crawl?${params.toString()}`);
   },
-  spellCheck:      (word)     => req(`/api/spellcheck?word=${encodeURIComponent(word)}`),
+  cards:           ()         => req('/api/cards'),
+  bankAnalytics:   ()         => req('/api/analytics/banks'),
+  spellCheck:      (word)     => req(`/api/spell/check?word=${encodeURIComponent(word)}`),
   complete:        (prefix)   => req(`/api/complete?prefix=${encodeURIComponent(prefix)}`),
   frequency:       (word)     => req(`/api/frequency?word=${encodeURIComponent(word)}`),
   searchFrequency: ()         => req('/api/search-frequency'),

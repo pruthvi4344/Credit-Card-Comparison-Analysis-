@@ -1,7 +1,7 @@
 package com.creditcard.comparison.controller;
 
-import com.creditcard.comparison.crawler.WebCrawler;
 import com.creditcard.comparison.index.FrequencyCounter;
+import com.creditcard.comparison.model.CardCatalogItem;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,19 +17,16 @@ import java.util.Map;
 public class FrequencyController {
 
     private final FrequencyCounter frequencyCounter;
-    private final WebCrawler webCrawler;
 
-    public FrequencyController(FrequencyCounter frequencyCounter, WebCrawler webCrawler) {
+    public FrequencyController(FrequencyCounter frequencyCounter) {
         this.frequencyCounter = frequencyCounter;
-        this.webCrawler = webCrawler;
     }
 
     @GetMapping("/frequency")
     public Map<String, Object> getFrequency(@RequestParam("word") String word) {
         frequencyCounter.updateSearchFrequency(word);
 
-        Map<String, String> pages = webCrawler.getCrawledPages();
-        Map<String, Integer> counts = frequencyCounter.countWordFrequency(word, pages);
+        Map<String, Integer> counts = frequencyCounter.countWordFrequency(word);
 
         List<Map<String, Object>> pageResults = new ArrayList<>();
         int totalCount = 0;
@@ -37,9 +34,13 @@ public class FrequencyController {
         for (Map.Entry<String, Integer> entry : counts.entrySet()) {
             int count = entry.getValue();
             totalCount += count;
+            CardCatalogItem card = frequencyCounter.getCardByKey(entry.getKey());
 
             Map<String, Object> pageResult = new LinkedHashMap<>();
-            pageResult.put("url", entry.getKey());
+            pageResult.put("title", card != null ? card.getTitle() : entry.getKey());
+            pageResult.put("bank", card != null ? card.getBank() : "");
+            pageResult.put("url", card != null ? card.getDetailsUrl() : "");
+            pageResult.put("annualFees", card != null ? card.getAnnualFees() : "");
             pageResult.put("count", count);
             pageResults.add(pageResult);
         }

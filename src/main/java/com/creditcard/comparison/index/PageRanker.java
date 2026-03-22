@@ -23,14 +23,17 @@ public class PageRanker {
         return sortByValue(ranking);
     }
 
-    private int countFrequency(String text, String keyword) {
-        if (text == null) return 0;
+    public int countFrequency(String text, String keyword) {
+        if (text == null || keyword == null || keyword.isBlank()) {
+            return 0;
+        }
 
         String[] words = text.toLowerCase().split("\\W+");
         int count = 0;
+        String normalizedKeyword = keyword.toLowerCase();
 
         for (String word : words) {
-            if (word.equals(keyword.toLowerCase())) {
+            if (word.equals(normalizedKeyword)) {
                 count++;
             }
         }

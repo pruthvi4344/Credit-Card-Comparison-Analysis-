@@ -1,6 +1,8 @@
 package com.creditcard.comparison.crawler;
 
 import com.creditcard.comparison.model.CreditCard;
+import com.creditcard.comparison.model.CardCatalogItem;
+import com.creditcard.comparison.service.CardCatalogService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -24,6 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class WebCrawler {
@@ -39,6 +43,12 @@ public class WebCrawler {
     );
 
     private final Map<String, String> crawledPages = new ConcurrentHashMap<>();
+    private final Map<String, CreditCard> cardDetailsCache = new ConcurrentHashMap<>();
+    private final CardCatalogService cardCatalogService;
+
+    public WebCrawler(CardCatalogService cardCatalogService) {
+        this.cardCatalogService = cardCatalogService;
+    }
 
     public Map<String, Object> startCrawling(List<String> requestedBanks) {
         List<String> banksToCrawl = resolveBanks(requestedBanks);
@@ -106,6 +116,7 @@ public class WebCrawler {
             String pageSource = driver.getPageSource();
             Document document = Jsoup.parse(pageSource, url);
             List<CreditCard> cards = extractCreditCards(bank, url, document);
+            cards = enrichCardsFromDetails(driver, cards);
             crawledPages.put(bank, document.text());
 
             result.put("status", "SUCCESS");
@@ -140,9 +151,10 @@ public class WebCrawler {
                 continue;
             }
 
+            String detailsUrl = href.isBlank() ? sourceUrl : href;
             uniqueCards.putIfAbsent(
                     href.isBlank() ? bank + ":" + name : href,
-                    new CreditCard(bank, name, href.isBlank() ? sourceUrl : href, sourceUrl)
+                    new CreditCard(bank, name, detailsUrl, sourceUrl)
             );
         }
 
@@ -162,6 +174,201 @@ public class WebCrawler {
         }
 
         return new ArrayList<>(uniqueCards.values());
+    }
+
+    private List<CreditCard> enrichCardsFromDetails(WebDriver driver, List<CreditCard> cards) {
+        List<CreditCard> enrichedCards = new ArrayList<>();
+
+        for (CreditCard card : cards) {
+            CreditCard enriched = scrapeCardDetails(driver, card);
+            enrichCardFromCatalog(enriched);
+            enrichedCards.add(enriched);
+        }
+
+        return enrichedCards;
+    }
+
+    private CreditCard scrapeCardDetails(WebDriver driver, CreditCard creditCard) {
+        String detailsUrl = creditCard.getDetailsUrl();
+        if (detailsUrl == null || detailsUrl.isBlank()) {
+            return creditCard;
+        }
+
+        CreditCard cached = cardDetailsCache.get(detailsUrl);
+        if (cached != null) {
+            copyDetailFields(cached, creditCard);
+            return creditCard;
+        }
+
+        try {
+            driver.get(detailsUrl);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+
+            Document detailDocument = Jsoup.parse(driver.getPageSource(), detailsUrl);
+            String pageText = normalize(detailDocument.text());
+
+            creditCard.setImageUrl(extractImageUrl(detailDocument, creditCard.getName()));
+            creditCard.setAnnualFees(findFirstMatch(pageText,
+                    "annual fee\\s*[:\\-]?\\s*(\\$?\\d+[\\d.,]*(?:\\.\\d{2})?(?:\\s*(?:first year rebated|waived))?)",
+                    "annual fee rebate\\s*\\((\\$?\\d+[\\d.,]*(?:\\.\\d{2})?)\\)"
+            ));
+            creditCard.setPurchaseInterestRate(findFirstMatch(pageText,
+                    "purchase(?:\\s+interest)?\\s+rate\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?%)"
+            ));
+            creditCard.setCashInterestRate(findFirstMatch(pageText,
+                    "cash(?:\\s+advance|\\s+interest)?\\s+rate\\s*[:\\-]?\\s*(\\d+(?:\\.\\d+)?%)"
+            ));
+            creditCard.setProductValueProp(extractValueProp(detailDocument, creditCard.getName()));
+            creditCard.setProductBenefits(extractBenefits(detailDocument));
+
+            CreditCard cacheEntry = new CreditCard(
+                    creditCard.getBank(),
+                    creditCard.getName(),
+                    creditCard.getDetailsUrl(),
+                    creditCard.getSourceUrl(),
+                    creditCard.getImageUrl(),
+                    creditCard.getAnnualFees(),
+                    creditCard.getPurchaseInterestRate(),
+                    creditCard.getCashInterestRate(),
+                    creditCard.getProductValueProp(),
+                    creditCard.getProductBenefits()
+            );
+            cardDetailsCache.put(detailsUrl, cacheEntry);
+        } catch (Exception ignored) {
+            // Keep the base card data when detail-page extraction fails.
+        }
+
+        return creditCard;
+    }
+
+    private void enrichCardFromCatalog(CreditCard creditCard) {
+        cardCatalogService.findBestMatch(
+                creditCard.getBank(),
+                creditCard.getName(),
+                creditCard.getDetailsUrl()
+        ).ifPresent(match -> applyCatalogFallback(creditCard, match));
+    }
+
+    private void applyCatalogFallback(CreditCard creditCard, CardCatalogItem match) {
+        if (isBlank(creditCard.getImageUrl())) {
+            creditCard.setImageUrl(match.getImageUrl());
+        }
+        if (isBlank(creditCard.getAnnualFees())) {
+            creditCard.setAnnualFees(match.getAnnualFees());
+        }
+        if (isBlank(creditCard.getPurchaseInterestRate())) {
+            creditCard.setPurchaseInterestRate(match.getPurchaseInterestRate());
+        }
+        if (isBlank(creditCard.getCashInterestRate())) {
+            creditCard.setCashInterestRate(match.getCashInterestRate());
+        }
+        if (isBlank(creditCard.getProductValueProp())) {
+            creditCard.setProductValueProp(match.getProductValueProp());
+        }
+        if (isBlank(creditCard.getProductBenefits())) {
+            creditCard.setProductBenefits(match.getProductBenefits());
+        }
+    }
+
+    private void copyDetailFields(CreditCard source, CreditCard target) {
+        target.setImageUrl(source.getImageUrl());
+        target.setAnnualFees(source.getAnnualFees());
+        target.setPurchaseInterestRate(source.getPurchaseInterestRate());
+        target.setCashInterestRate(source.getCashInterestRate());
+        target.setProductValueProp(source.getProductValueProp());
+        target.setProductBenefits(source.getProductBenefits());
+    }
+
+    private String extractImageUrl(Document detailDocument, String cardName) {
+        String normalizedCardName = cardName == null ? "" : cardName.toLowerCase(Locale.ENGLISH);
+
+        for (Element image : detailDocument.select("img[src]")) {
+            String alt = image.attr("alt").toLowerCase(Locale.ENGLISH);
+            String src = image.absUrl("src");
+            if (src.isBlank()) {
+                src = image.attr("src");
+            }
+
+            if (src.isBlank()) {
+                continue;
+            }
+
+            if (alt.contains("credit card")
+                    || alt.contains("card")
+                    || (!normalizedCardName.isBlank() && alt.contains(normalizedCardName))) {
+                return src.trim();
+            }
+        }
+
+        return "";
+    }
+
+    private String extractValueProp(Document detailDocument, String cardName) {
+        for (String selector : List.of(
+                "meta[name=description]",
+                "meta[property=og:description]",
+                "main p",
+                "article p",
+                "section p"
+        )) {
+            Elements elements = detailDocument.select(selector);
+            for (Element element : elements) {
+                String text = selector.startsWith("meta") ? element.attr("content") : element.text();
+                text = normalize(text);
+                if (isMeaningfulDescription(text, cardName)) {
+                    return text;
+                }
+            }
+        }
+
+        return "";
+    }
+
+    private boolean isMeaningfulDescription(String text, String cardName) {
+        if (text == null || text.isBlank()) {
+            return false;
+        }
+
+        String lower = text.toLowerCase(Locale.ENGLISH);
+        return text.length() >= 25
+                && text.length() <= 280
+                && !lower.contains("apply now")
+                && !lower.contains("skip to")
+                && !lower.contains("legal disclaimer")
+                && (cardName == null || cardName.isBlank() || lower.contains(cardName.toLowerCase(Locale.ENGLISH)) || lower.contains("card"));
+    }
+
+    private String extractBenefits(Document detailDocument) {
+        List<String> benefits = new ArrayList<>();
+
+        for (Element item : detailDocument.select("ul li, ol li")) {
+            String text = normalize(item.text());
+            if (text.length() >= 20 && text.length() <= 180 && !text.toLowerCase(Locale.ENGLISH).contains("apply now")) {
+                benefits.add(text);
+            }
+            if (benefits.size() == 3) {
+                break;
+            }
+        }
+
+        return String.join(" | ", benefits);
+    }
+
+    private String findFirstMatch(String text, String... patterns) {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+
+        for (String patternText : patterns) {
+            Pattern pattern = Pattern.compile(patternText, Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(text);
+            if (matcher.find()) {
+                return matcher.group(1).trim();
+            }
+        }
+
+        return "";
     }
 
     private boolean isCandidateCard(String name, String href, String sourceUrl) {
@@ -288,6 +495,10 @@ public class WebCrawler {
 
     private String normalize(String value) {
         return value == null ? "" : value.replaceAll("\\s+", " ").trim();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private List<String> resolveBanks(List<String> requestedBanks) {

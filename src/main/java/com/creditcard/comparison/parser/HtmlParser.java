@@ -2,25 +2,19 @@ package com.creditcard.comparison.parser;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.stereotype.Component;
 
+@Component
 public class HtmlParser {
 
-    // Extract clean text from HTML page
-    public String extractText(String url) {
-        try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0")
-                    .timeout(5000)
-                    .get();
+    public String parseHtml(String html) {
+        if (html == null || html.isBlank()) return "";
 
-            // remove scripts and styles
-            doc.select("script, style").remove();
+        Document doc = Jsoup.parse(html);
 
-            return doc.body().text();
+        // Remove scripts and styles
+        doc.select("script, style").remove();
 
-        } catch (Exception e) {
-            System.out.println("Error fetching: " + url);
-            return "";
-        }
+        return doc.text();
     }
 }

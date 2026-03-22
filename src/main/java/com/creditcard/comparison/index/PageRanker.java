@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class PageRanker {
 
     public Map<String, Integer> rankPages(Map<String, String> pages, String keyword) {
@@ -20,7 +23,7 @@ public class PageRanker {
             ranking.put(page, count);
         }
 
-        return sortByValue(ranking);
+        return sortDescending(ranking);
     }
 
     private int countFrequency(String text, String keyword) {
@@ -38,7 +41,7 @@ public class PageRanker {
         return count;
     }
 
-    private Map<String, Integer> sortByValue(Map<String, Integer> map) {
+    private Map<String, Integer> sortDescending(Map<String, Integer> map) {
         List<Map.Entry<String, Integer>> list = new ArrayList<>(map.entrySet());
 
         list.sort((a, b) -> b.getValue() - a.getValue());

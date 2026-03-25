@@ -13,6 +13,7 @@ const sections = [
       { id: 'recommendations', label: 'Recommendations', icon: '\u2605', badge: 'FIT' },
       { id: 'analytics', label: 'Bank Analytics', icon: '\u25a3', badge: 'INSIGHT' },
       { id: 'crawler', label: 'Web Crawler', icon: '\ud83d\udd77', badge: 'GET' },
+      { id: 'parser', label: 'HTML Parser', icon: '\u25a4', badge: 'GET' },
       { id: 'search', label: 'Search', icon: '\u2315', badge: 'GET' },
     ],
   },

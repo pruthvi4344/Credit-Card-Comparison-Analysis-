@@ -6,6 +6,7 @@ const features = [
   { id: 'recommendations', icon: '\u2605', name: 'Recommendations', desc: 'Answer a short questionnaire and get the top credit card matches from the catalog.', api: 'GET /api/cards' },
   { id: 'analytics', icon: '\u25a3', name: 'Bank Analytics', desc: 'Analyze card counts, fee averages, interest rates, and dominant categories by bank.', api: 'GET /api/analytics/banks' },
   { id: 'crawler', icon: '\ud83d\udd77', name: 'Web Crawler', desc: 'Crawl credit card websites and collect raw HTML for indexing and analysis.', api: 'GET /api/crawl' },
+  { id: 'parser', icon: '\u25a4', name: 'HTML Parser', desc: 'Parse a live webpage with Jsoup and extract clean visible text for analysis.', api: 'GET /api/html/parse' },
   { id: 'search', icon: '\u2315', name: 'Keyword Search', desc: 'Inverted index search across all indexed pages for instant keyword retrieval.', api: 'GET /api/search' },
   { id: 'spellcheck', icon: '\u2713', name: 'Spell Check', desc: 'Correct misspelled words using Levenshtein edit distance algorithm.', api: 'GET /api/spellcheck' },
   { id: 'completion', icon: '\u25cc', name: 'Word Completion', desc: 'Autocomplete prefix queries from the full indexed vocabulary.', api: 'GET /api/complete' },
@@ -16,8 +17,8 @@ const features = [
 ];
 
 const stats = [
-  { val: '12', lbl: 'Modules', cls: 'green' },
-  { val: '13', lbl: 'Endpoints', cls: 'cyan' },
+  { val: '13', lbl: 'Modules', cls: 'green' },
+  { val: '14', lbl: 'Endpoints', cls: 'cyan' },
   { val: 'CSV', lbl: 'Catalog', cls: 'amber' },
   { val: 'LIVE', lbl: 'Status', cls: 'green' },
 ];
@@ -66,6 +67,7 @@ export default function DashboardPage({ onNav }) {
 GET  /api/crawl                  -> Trigger web crawler
 GET  /api/cards                  -> View all cards from CSV
 GET  /api/analytics/banks        -> Bank analytics dashboard
+GET  /api/html/parse?url=VALUE   -> Parse HTML and extract text
 GET  /api/search?keyword=VALUE   -> Inverted index search
 GET  /api/spellcheck?word=VALUE  -> Spell correction
 GET  /api/complete?prefix=VALUE  -> Word autocomplete

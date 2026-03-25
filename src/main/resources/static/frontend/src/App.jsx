@@ -8,6 +8,7 @@ import ComparePage from './pages/ComparePage.jsx';
 import RecommendationsPage from './pages/RecommendationsPage.jsx';
 import BankAnalyticsPage from './pages/BankAnalyticsPage.jsx';
 import CrawlerPage from './pages/CrawlerPage.jsx';
+import HtmlParserPage from './pages/HtmlParserPage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
 import SpellCheckPage from './pages/SpellCheckPage.jsx';
 import WordCompletionPage from './pages/WordCompletionPage.jsx';
@@ -23,6 +24,7 @@ const PAGES = {
   recommendations: RecommendationsPage,
   analytics: BankAnalyticsPage,
   crawler: CrawlerPage,
+  parser: HtmlParserPage,
   search: SearchPage,
   spellcheck: SpellCheckPage,
   completion: WordCompletionPage,

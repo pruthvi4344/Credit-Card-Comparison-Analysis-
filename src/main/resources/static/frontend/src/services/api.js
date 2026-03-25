@@ -24,6 +24,7 @@ const api = {
   },
   cards:           ()         => req('/api/cards'),
   bankAnalytics:   ()         => req('/api/analytics/banks'),
+  htmlParse:       (url)      => req(`/api/html/parse?url=${encodeURIComponent(url)}`),
   spellCheck:      (word)     => req(`/api/spell/check?word=${encodeURIComponent(word)}`),
   complete:        (prefix)   => req(`/api/complete?prefix=${encodeURIComponent(prefix)}`),
   frequency:       (word)     => req(`/api/frequency?word=${encodeURIComponent(word)}`),

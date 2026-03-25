@@ -27,6 +27,9 @@ public class SpellCheckService {
     private void loadWordsFromCSV() {
         try {
             InputStream is = getClass().getResourceAsStream("/data/credit_cards.csv");
+            if (is == null) {
+                throw new IllegalStateException("credit_cards.csv could not be loaded for spell check.");
+            }
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             String line;
@@ -47,7 +50,7 @@ public class SpellCheckService {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Failed to initialize spell check dictionary.", e);
         }
     }
 
@@ -71,11 +74,17 @@ public class SpellCheckService {
 
     // Exact match is the first cheap check before suggestion generation.
     public boolean isCorrect(String word) {
+        if (word == null || word.isBlank()) {
+            return false;
+        }
         return dictionary.contains(word.toLowerCase());
     }
 
     // Suggestions are ranked with Levenshtein edit distance because this is a typo-correction problem.
     public List<String> getSuggestions(String input) {
+        if (input == null || input.isBlank()) {
+            return List.of();
+        }
         final String wordInput = input.toLowerCase();
         List<String> result = new ArrayList<>();
 

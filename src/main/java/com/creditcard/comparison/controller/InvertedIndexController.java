@@ -1,5 +1,6 @@
 package com.creditcard.comparison.controller;
 
+import com.creditcard.comparison.exception.BadRequestException;
 import com.creditcard.comparison.invertedindex.InvertedIndexService;
 import com.creditcard.comparison.model.CardCatalogItem;
 import com.creditcard.comparison.service.CardCatalogService;
@@ -28,17 +29,29 @@ public class InvertedIndexController {
 
     @GetMapping("/api/index/add")
     public String add(@RequestParam String id, @RequestParam String text) {
+        if (id == null || id.trim().isEmpty()) {
+            throw new BadRequestException("Document id is required.");
+        }
+        if (text == null || text.trim().isEmpty()) {
+            throw new BadRequestException("Document text is required.");
+        }
         service.addDocument(id, text);
         return "Document added!";
     }
 
     @GetMapping("/api/index/search")
     public Set<String> searchIndexedWord(@RequestParam String word) {
+        if (word == null || word.trim().isEmpty()) {
+            throw new BadRequestException("Search word is required.");
+        }
         return service.search(word);
     }
 
     @GetMapping("/api/search")
     public Map<String, Object> searchForFrontend(@RequestParam("keyword") String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new BadRequestException("Keyword is required.");
+        }
         Set<String> matches = service.search(keyword);
         List<CardCatalogItem> cards = cardCatalogService.findByTitles(new ArrayList<>(matches));
 

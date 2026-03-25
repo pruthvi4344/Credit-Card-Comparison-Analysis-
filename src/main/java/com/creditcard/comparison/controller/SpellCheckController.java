@@ -1,5 +1,6 @@
 package com.creditcard.comparison.controller;
 
+import com.creditcard.comparison.exception.BadRequestException;
 import com.creditcard.comparison.spellcheck.SpellCheckService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,10 @@ public class SpellCheckController {
 
     @GetMapping({"/api/spell/check", "/api/spellcheck"})
     public Map<String, Object> checkWord(@RequestParam String word) {
+        if (word == null || word.trim().isEmpty()) {
+            throw new BadRequestException("Word is required.");
+        }
+
         Map<String, Object> response = new HashMap<>();
 
         boolean correct = service.isCorrect(word);

@@ -1,5 +1,7 @@
 package com.creditcard.comparison.parser;
 
+import com.creditcard.comparison.exception.BadRequestException;
+import com.creditcard.comparison.exception.ResourceProcessingException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
@@ -9,7 +11,7 @@ public class HtmlParser {
 
     public ParseResult parseUrl(String url) {
         if (url == null || url.trim().isEmpty()) {
-            return new ParseResult("", "", "", 0, "URL is required.");
+            throw new BadRequestException("URL is required.");
         }
 
         String targetUrl = url.trim();
@@ -27,12 +29,12 @@ public class HtmlParser {
             String text = doc.body() == null ? "" : doc.body().text().replaceAll("\\s+", " ").trim();
             int wordCount = text.isBlank() ? 0 : text.split("\\s+").length;
 
-            return new ParseResult(targetUrl, title, text, wordCount, "");
+            return new ParseResult(targetUrl, title, text, wordCount);
         } catch (Exception e) {
-            return new ParseResult(targetUrl, "", "", 0, "Failed to parse URL: " + e.getMessage());
+            throw new ResourceProcessingException("Failed to parse URL: " + e.getMessage(), e);
         }
     }
 
-    public record ParseResult(String url, String title, String text, int wordCount, String error) {
+    public record ParseResult(String url, String title, String text, int wordCount) {
     }
 }

@@ -46,10 +46,8 @@ public class WordCompletionService {
                 }
             }
 
-            System.out.println("CSV loaded successfully into trie");
-
         } catch (Exception e) {
-            System.out.println("Error loading CSV: " + e.getMessage());
+            throw new IllegalStateException("Failed to initialize word completion trie.", e);
         }
     }
 

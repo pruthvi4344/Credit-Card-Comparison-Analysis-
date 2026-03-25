@@ -1,5 +1,6 @@
 package com.creditcard.comparison.controller;
 
+import com.creditcard.comparison.exception.BadRequestException;
 import com.creditcard.comparison.util.RegexValidator;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,10 +21,14 @@ public class RegexController {
 
     @PostMapping("/validate")
     public Map<String, Object> validate(@RequestBody ValidateRequest request) {
+        if (request == null || request.input() == null || request.input().trim().isEmpty()) {
+            throw new BadRequestException("Validation input is required.");
+        }
+
         RegexValidator.ValidationResult result = regexValidator.validate(
-                request == null ? null : request.input(),
-                request == null ? null : request.pattern(),
-                request == null ? null : request.type()
+                request.input(),
+                request.pattern(),
+                request.type()
         );
         return Map.of(
                 "input", result.input(),
@@ -36,7 +41,11 @@ public class RegexController {
 
     @PostMapping("/pattern")
     public Map<String, Object> findPattern(@RequestBody PatternRequest request) {
-        RegexValidator.PatternResult result = regexValidator.findPatterns(request == null ? null : request.text(), request == null ? null : request.type());
+        if (request == null || request.text() == null || request.text().trim().isEmpty()) {
+            throw new BadRequestException("Pattern input text is required.");
+        }
+
+        RegexValidator.PatternResult result = regexValidator.findPatterns(request.text(), request.type());
         return Map.of(
                 "type", result.type(),
                 "pattern", result.pattern(),

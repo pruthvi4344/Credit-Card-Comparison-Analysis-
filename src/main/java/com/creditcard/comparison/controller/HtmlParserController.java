@@ -28,8 +28,7 @@ public class HtmlParserController {
         response.put("title", result.title());
         response.put("text", result.text());
         response.put("wordCount", result.wordCount());
-        response.put("success", result.error() == null || result.error().isBlank());
-        response.put("error", result.error());
+        response.put("success", true);
         return response;
     }
 }

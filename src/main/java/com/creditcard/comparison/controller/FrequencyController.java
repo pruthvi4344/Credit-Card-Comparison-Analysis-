@@ -1,5 +1,6 @@
 package com.creditcard.comparison.controller;
 
+import com.creditcard.comparison.exception.BadRequestException;
 import com.creditcard.comparison.index.FrequencyCounter;
 import com.creditcard.comparison.model.CardCatalogItem;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,10 @@ public class FrequencyController {
 
     @GetMapping("/frequency")
     public Map<String, Object> getFrequency(@RequestParam("word") String word) {
+        if (word == null || word.trim().isEmpty()) {
+            throw new BadRequestException("Query word is required.");
+        }
+
         frequencyCounter.updateSearchFrequency(word);
 
         Map<String, Integer> counts = frequencyCounter.countWordFrequency(word);

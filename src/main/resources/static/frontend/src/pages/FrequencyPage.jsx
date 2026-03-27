@@ -13,8 +13,17 @@ export default function FrequencyPage() {
 
   const run = async (w) => {
     const t = (w || word).trim();
-    if (!t) return;
-    setWord(t); setLoading(true); setErr(''); setResult(null);
+    if (!t) {
+      setErr('Please enter a word to search.');
+      setResult(null);
+      return;
+    }
+
+    setWord(t);
+    setLoading(true);
+    setErr('');
+    setResult(null);
+
     try {
       const data = await api.frequency(t);
       const count = typeof data === 'number' ? data
@@ -30,7 +39,7 @@ export default function FrequencyPage() {
   };
 
   const maxCount = result?.pages?.length
-    ? Math.max(...result.pages.map(p => p.count || 0), 1)
+    ? Math.max(...result.pages.map((p) => p.count || 0), 1)
     : 1;
 
   return (
@@ -49,24 +58,29 @@ export default function FrequencyPage() {
           <input
             type="text"
             value={word}
-            onChange={e => setWord(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && run()}
+            onChange={(e) => setWord(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && run()}
             placeholder="e.g. cashback, rewards, APR..."
           />
-          <button className="btn btn-primary" onClick={() => run()} disabled={loading || !word.trim()}>
-            {loading ? <><span className="spinner-sm" /> Counting</> : '◈  Count'}
+          <button className="btn btn-primary" onClick={() => run()} disabled={loading}>
+            {loading ? <><span className="spinner-sm" /> Counting</> : 'Count'}
           </button>
         </div>
 
         <div>
-          <div style={{ fontSize:11, color:'var(--text-400)', marginBottom:8, fontFamily:'var(--font-mono)', letterSpacing:'0.5px' }}>
-            POPULAR TERMS →
+          <div style={{ fontSize: 11, color: 'var(--text-400)', marginBottom: 8, fontFamily: 'var(--font-mono)', letterSpacing: '0.5px' }}>
+            POPULAR TERMS {'->'}
           </div>
-          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-            {popular.map(p => (
-              <button key={p} className="btn btn-secondary btn-sm"
-                style={{ fontFamily:'var(--font-mono)', fontSize:12 }}
-                onClick={() => run(p)}>{p}</button>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {popular.map((p) => (
+              <button
+                key={p}
+                className="btn btn-secondary btn-sm"
+                style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}
+                onClick={() => run(p)}
+              >
+                {p}
+              </button>
             ))}
           </div>
         </div>
@@ -77,13 +91,13 @@ export default function FrequencyPage() {
 
       {!loading && result && (
         <div className="fade-up">
-          <div className="stat-grid" style={{ marginBottom:20 }}>
+          <div className="stat-grid" style={{ marginBottom: 20 }}>
             <div className="stat-card green">
               <div className="stat-val green">{result.count.toLocaleString()}</div>
               <div className="stat-lbl">Total Occurrences</div>
             </div>
             <div className="stat-card cyan">
-              <div className="stat-val cyan">{result.pages.length || '—'}</div>
+              <div className="stat-val cyan">{result.pages.length || '-'}</div>
               <div className="stat-lbl">Pages Found</div>
             </div>
           </div>
@@ -91,22 +105,22 @@ export default function FrequencyPage() {
           {result.pages.length > 0 && (
             <div className="card">
               <div className="card-label">Per-Page Breakdown</div>
-              <div className="card-title" style={{ marginBottom:16 }}>
+              <div className="card-title" style={{ marginBottom: 16 }}>
                 Pages containing &ldquo;{result.word}&rdquo;
               </div>
               {result.pages.map((p, i) => {
                 const cnt = p.count || 0;
                 const pct = Math.round((cnt / maxCount) * 100);
                 return (
-                  <div key={i} style={{ marginBottom:12 }}>
-                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:5 }}>
+                  <div key={i} style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                       <a className="url" href={p.url || p} target="_blank" rel="noopener noreferrer">
                         {p.url || p}
                       </a>
                       <span className="badge badge-green">{cnt}</span>
                     </div>
-                    <div className="progress-wrap" style={{ width:'100%' }}>
-                      <div className="progress-fill" style={{ width:`${pct}%` }} />
+                    <div className="progress-wrap" style={{ width: '100%' }}>
+                      <div className="progress-fill" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );

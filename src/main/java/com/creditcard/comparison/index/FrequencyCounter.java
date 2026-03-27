@@ -31,35 +31,39 @@ public class FrequencyCounter {
         frequencyIndex.clear();
         cardLookup.clear();
 
-        for (CardCatalogItem card : cardCatalogService.getAllCards()) {
-            String cardKey = buildCardKey(card);
-            cardLookup.put(cardKey, card);
+        try {
+            for (CardCatalogItem card : cardCatalogService.getAllCards()) {
+                String cardKey = buildCardKey(card);
+                cardLookup.put(cardKey, card);
 
-            String combinedText = String.join(" ",
-                    safe(card.getTitle()),
-                    safe(card.getAnnualFees()),
-                    safe(card.getPurchaseInterestRate()),
-                    safe(card.getCashInterestRate()),
-                    safe(card.getProductValueProp()),
-                    safe(card.getProductBenefits()),
-                    safe(card.getBank())
-            ).toLowerCase(Locale.ENGLISH);
+                String combinedText = String.join(" ",
+                        safe(card.getTitle()),
+                        safe(card.getAnnualFees()),
+                        safe(card.getPurchaseInterestRate()),
+                        safe(card.getCashInterestRate()),
+                        safe(card.getProductValueProp()),
+                        safe(card.getProductBenefits()),
+                        safe(card.getBank())
+                ).toLowerCase(Locale.ENGLISH);
 
-            String[] words = combinedText.split("[^a-z0-9]+");
-            Map<String, Integer> perCardCounts = new HashMap<>();
+                String[] words = combinedText.split("[^a-z0-9]+");
+                Map<String, Integer> perCardCounts = new HashMap<>();
 
-            for (String word : words) {
-                if (word == null || word.isBlank()) {
-                    continue;
+                for (String word : words) {
+                    if (word == null || word.isBlank()) {
+                        continue;
+                    }
+                    perCardCounts.put(word, perCardCounts.getOrDefault(word, 0) + 1);
                 }
-                perCardCounts.put(word, perCardCounts.getOrDefault(word, 0) + 1);
-            }
 
-            for (Map.Entry<String, Integer> entry : perCardCounts.entrySet()) {
-                frequencyIndex
-                        .computeIfAbsent(entry.getKey(), ignored -> new LinkedHashMap<>())
-                        .put(cardKey, entry.getValue());
+                for (Map.Entry<String, Integer> entry : perCardCounts.entrySet()) {
+                    frequencyIndex
+                            .computeIfAbsent(entry.getKey(), ignored -> new LinkedHashMap<>())
+                            .put(cardKey, entry.getValue());
+                }
             }
+        } catch (RuntimeException ignored) {
+            // If the CSV is unavailable we keep an empty index and let request-time error handling surface the real cause.
         }
     }
 

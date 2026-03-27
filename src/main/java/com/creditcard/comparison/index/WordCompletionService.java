@@ -1,5 +1,6 @@
 package com.creditcard.comparison.index;
 
+import com.creditcard.comparison.exception.ResourceProcessingException;
 import jakarta.annotation.PostConstruct;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class WordCompletionService {
 
     // Trie is the right fit because this feature is fundamentally a prefix-search problem.
     private final TrieNode root = new TrieNode();
+    private String loadError = "";
 
     @PostConstruct
     public void loadCSV() {
@@ -47,7 +49,7 @@ public class WordCompletionService {
             }
 
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to initialize word completion trie.", e);
+            loadError = "The database file credit_cards.csv does not exist or could not be loaded.";
         }
     }
 
@@ -71,6 +73,7 @@ public class WordCompletionService {
 
     // Prefix walk + DFS returns all completions under the matching trie branch.
     public Map<String, Integer> autocomplete(String prefix, int limit) {
+        ensureTrieAvailable();
         Map<String, Integer> result = new LinkedHashMap<>();
 
         if (prefix == null || prefix.isBlank()) {
@@ -126,6 +129,12 @@ public class WordCompletionService {
         Suggestion(String word, int frequency) {
             this.word = word;
             this.frequency = frequency;
+        }
+    }
+
+    private void ensureTrieAvailable() {
+        if (!loadError.isBlank()) {
+            throw new ResourceProcessingException(loadError);
         }
     }
 }

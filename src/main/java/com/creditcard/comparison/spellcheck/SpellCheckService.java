@@ -1,5 +1,6 @@
 package com.creditcard.comparison.spellcheck;
 
+import com.creditcard.comparison.exception.ResourceProcessingException;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -17,6 +18,7 @@ public class SpellCheckService {
 
     // HashSet gives us fast exact lookup before we do the more expensive typo scoring step.
     private final Set<String> dictionary = new HashSet<>();
+    private String loadError = "";
 
     // Load the dictionary once at startup so suggestions stay cheap during requests.
     public SpellCheckService() {
@@ -28,7 +30,8 @@ public class SpellCheckService {
         try {
             InputStream is = getClass().getResourceAsStream("/data/credit_cards.csv");
             if (is == null) {
-                throw new IllegalStateException("credit_cards.csv could not be loaded for spell check.");
+                loadError = "The database file credit_cards.csv does not exist or could not be loaded.";
+                return;
             }
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
@@ -50,7 +53,7 @@ public class SpellCheckService {
             }
 
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to initialize spell check dictionary.", e);
+            loadError = "The database file credit_cards.csv does not exist or could not be loaded.";
         }
     }
 
@@ -74,6 +77,7 @@ public class SpellCheckService {
 
     // Exact match is the first cheap check before suggestion generation.
     public boolean isCorrect(String word) {
+        ensureDictionaryAvailable();
         if (word == null || word.isBlank()) {
             return false;
         }
@@ -82,6 +86,7 @@ public class SpellCheckService {
 
     // Suggestions are ranked with Levenshtein edit distance because this is a typo-correction problem.
     public List<String> getSuggestions(String input) {
+        ensureDictionaryAvailable();
         if (input == null || input.isBlank()) {
             return List.of();
         }
@@ -119,5 +124,11 @@ public class SpellCheckService {
         }
 
         return dp[a.length()][b.length()];
+    }
+
+    private void ensureDictionaryAvailable() {
+        if (!loadError.isBlank()) {
+            throw new ResourceProcessingException(loadError);
+        }
     }
 }

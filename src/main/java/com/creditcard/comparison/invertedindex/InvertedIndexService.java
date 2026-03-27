@@ -1,5 +1,6 @@
 package com.creditcard.comparison.invertedindex;
 
+import com.creditcard.comparison.exception.ResourceProcessingException;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ public class InvertedIndexService {
 
     // Inverted index shape: token -> set of card titles containing that token.
     private final Map<String, Set<String>> index = new HashMap<>();
+    private String loadError = "";
 
     // Build the index once when the app starts so keyword lookup stays fast later.
     @PostConstruct
@@ -52,11 +54,8 @@ public class InvertedIndexService {
                 String text = (data[5] + " " + data[6]).toLowerCase();
                 addDocument(id, text);
             }
-
-            System.out.println("CSV loaded into inverted index");
-
         } catch (Exception e) {
-            e.printStackTrace();
+            loadError = "The database file credit_cards.csv does not exist or could not be loaded.";
         }
     }
 
@@ -74,6 +73,13 @@ public class InvertedIndexService {
 
     // Search is just a direct map lookup once the index has already been built.
     public Set<String> search(String word) {
+        ensureIndexAvailable();
         return index.getOrDefault(word.toLowerCase(), Collections.emptySet());
+    }
+
+    private void ensureIndexAvailable() {
+        if (!loadError.isBlank()) {
+            throw new ResourceProcessingException(loadError);
+        }
     }
 }

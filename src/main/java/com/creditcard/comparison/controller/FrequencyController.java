@@ -3,6 +3,7 @@ package com.creditcard.comparison.controller;
 import com.creditcard.comparison.exception.BadRequestException;
 import com.creditcard.comparison.index.FrequencyCounter;
 import com.creditcard.comparison.model.CardCatalogItem;
+import com.creditcard.comparison.service.CardCatalogService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,9 +19,11 @@ import java.util.Map;
 public class FrequencyController {
 
     private final FrequencyCounter frequencyCounter;
+    private final CardCatalogService cardCatalogService;
 
-    public FrequencyController(FrequencyCounter frequencyCounter) {
+    public FrequencyController(FrequencyCounter frequencyCounter, CardCatalogService cardCatalogService) {
         this.frequencyCounter = frequencyCounter;
+        this.cardCatalogService = cardCatalogService;
     }
 
     @GetMapping("/frequency")
@@ -59,6 +62,9 @@ public class FrequencyController {
 
     @GetMapping("/search-frequency")
     public Map<String, Integer> getSearchFrequency() {
+        if (!cardCatalogService.isAvailable()) {
+            throw new BadRequestException(cardCatalogService.getLoadError());
+        }
         return frequencyCounter.displaySearchHistory();
     }
 }

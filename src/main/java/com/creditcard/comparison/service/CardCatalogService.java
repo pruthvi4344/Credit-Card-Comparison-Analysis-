@@ -1,5 +1,6 @@
 package com.creditcard.comparison.service;
 
+import com.creditcard.comparison.exception.ResourceProcessingException;
 import com.creditcard.comparison.model.CardCatalogItem;
 import jakarta.annotation.PostConstruct;
 import org.springframework.core.io.ClassPathResource;
@@ -20,10 +21,12 @@ import java.util.stream.Collectors;
 public class CardCatalogService {
 
     private final List<CardCatalogItem> cards = new ArrayList<>();
+    private String loadError = "";
 
     @PostConstruct
     public void loadCards() {
         cards.clear();
+        loadError = "";
 
         ClassPathResource resource = new ClassPathResource("data/credit_cards.csv");
 
@@ -61,15 +64,17 @@ public class CardCatalogService {
                 ));
             }
         } catch (IOException ex) {
-            throw new IllegalStateException("Failed to load credit_cards.csv", ex);
+            loadError = "The database file credit_cards.csv does not exist or could not be loaded.";
         }
     }
 
     public List<CardCatalogItem> getAllCards() {
+        ensureCatalogAvailable();
         return Collections.unmodifiableList(cards);
     }
 
     public Optional<CardCatalogItem> findBestMatch(String bank, String cardName, String detailsUrl) {
+        ensureCatalogAvailable();
         String normalizedBank = normalize(bank);
         String normalizedName = normalize(cardName);
         String normalizedUrl = normalizeUrl(detailsUrl);
@@ -81,6 +86,7 @@ public class CardCatalogService {
     }
 
     public List<CardCatalogItem> findByTitles(List<String> titles) {
+        ensureCatalogAvailable();
         if (titles == null || titles.isEmpty()) {
             return List.of();
         }
@@ -140,5 +146,19 @@ public class CardCatalogService {
 
     private String clean(String value) {
         return value == null ? "" : value.replace("\"", "").trim();
+    }
+
+    public boolean isAvailable() {
+        return loadError.isBlank();
+    }
+
+    public String getLoadError() {
+        return loadError;
+    }
+
+    private void ensureCatalogAvailable() {
+        if (!isAvailable()) {
+            throw new ResourceProcessingException(loadError);
+        }
     }
 }

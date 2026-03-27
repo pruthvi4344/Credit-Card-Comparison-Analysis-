@@ -1,5 +1,6 @@
 package com.creditcard.comparison.controller;
 
+import com.creditcard.comparison.exception.BadRequestException;
 import com.creditcard.comparison.index.PageRanker;
 import com.creditcard.comparison.model.CardCatalogItem;
 import com.creditcard.comparison.service.CardCatalogService;
@@ -28,6 +29,10 @@ public class PageRankingController {
     @GetMapping("/rank")
     public Map<String, Object> rank(@RequestParam String keyword) {
         String normalizedKeyword = keyword == null ? "" : keyword.trim();
+        if (normalizedKeyword.isEmpty()) {
+            throw new BadRequestException("Keyword is required for page ranking.");
+        }
+
         List<Map<String, Object>> rankings = new ArrayList<>();
 
         for (CardCatalogItem card : cardCatalogService.getAllCards()) {

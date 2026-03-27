@@ -19,7 +19,11 @@ export default function RankingPage() {
   const [err, setErr] = useState('');
 
   const run = async () => {
-    if (!kw.trim()) return;
+    if (!kw.trim()) {
+      setErr('Please enter a keyword to rank.');
+      setResults(null);
+      return;
+    }
     setLoading(true);
     setErr('');
     setResults(null);

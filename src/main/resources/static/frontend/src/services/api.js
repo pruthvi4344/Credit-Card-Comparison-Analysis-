@@ -6,10 +6,18 @@ async function req(url, opts = {}) {
       headers: { 'Content-Type': 'application/json', ...opts.headers },
       ...opts,
     });
-    if (!res.ok) throw new Error(`${res.status} - ${res.statusText}`);
     const text = await res.text();
-    if (!text) return null;
-    try { return JSON.parse(text); } catch { return text; }
+    let payload = null;
+    if (text) {
+      try { payload = JSON.parse(text); } catch { payload = text; }
+    }
+    if (!res.ok) {
+      const message = typeof payload === 'object' && payload?.message
+        ? payload.message
+        : `${res.status} - ${res.statusText}`;
+      throw new Error(message);
+    }
+    return payload;
   } catch (e) {
     throw new Error(e.message || 'Network error - is the backend running?');
   }
